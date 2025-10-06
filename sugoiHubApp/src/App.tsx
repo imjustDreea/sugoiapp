@@ -1,18 +1,35 @@
 import "./index.css";
 import "./App.css";
+import Layout from "./components/layout/Layout";
+import { Button, Card } from './components/ui';
+import Input from './components/form/Input';
 
 function App() {
 
   return (
     <>
      
-<div className="grid grid-cols-5 grid-rows-5 gap-4 bg-b">
-    <div className="col-span-3 row-span-5">1</div>
-    <div className="col-span-2 col-start-4">2</div>
-    <div className="col-span-2 row-span-4 col-start-4 row-start-2">3</div>
-</div>
-    
-   
+    <Layout>
+      <div>
+        <h1>Bienvenido a SugoiHub</h1>
+        <p>Este es el contenido principal de la aplicación.</p>
+
+        <section style={{ marginTop: 20 }}>
+          <Card title="Ejemplo de tarjeta">
+            <p>Contenido de la tarjeta. Usa los componentes reutilizables creados.</p>
+            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+              <Button onClick={() => alert('Click primario')}>Primario</Button>
+              <Button variant="secondary">Secundario</Button>
+              <Button variant="ghost">Ghost</Button>
+            </div>
+          </Card>
+
+          <div style={{ marginTop: 16 }}>
+            <Input label="Nombre" placeholder="Escribe tu nombre" />
+          </div>
+        </section>
+      </div>
+    </Layout>
     </>
   )
 }
