@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useState } from 'react';
 
 
-export function FollowCard({userName, children}: { userName: string; isFollowing: boolean; children?: ReactNode }) {
+export function FollowCard({userName, children}: { userName: string; children?: ReactNode }) {
 const [isFollowingState, setIsFollowingState] = useState(false);
 
     return (
