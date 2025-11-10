@@ -1,9 +1,8 @@
-
-import Sidebar from "../components/Sidebar";
-import Topbar from "../components/Topbar";
-import MainCard from "../components/MainCard";
-import ProfileCard from "../components/ProfileCard";
-import RecommendationCard from "../components/RecommendationCard";
+import Sidebar from "../components/allPages/Sidebar";
+import Topbar from "../components/allPages/Topbar";
+import MainCard from "../components/allPages/MainCard";
+import ProfileCard from "../components/homeComponents/ProfileCard";
+import RecommendationCard from "../components/homeComponents/RecommendationCard";
 
 const Dashboard = () => {
   return (
