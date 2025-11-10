@@ -1,11 +1,11 @@
 @import "tailwindcss";
 :root {
   /* Definición de tus colores como variables CSS */
-  --color-dark: #0f0f1a;
-  --color-darkCard: #1a1a2e;
-  --color-darkPanel: #141421;
-  --color-accentPurple: #a855f7;
-  --color-accentPink: #ec4899;
+  --neon-green: #07D98C;
+  --electric-blue: #4227F2;
+  --soft-pink: #F27EB4;
+  --deep-magenta: #A60D61;
+  --dark-wine: #400224;
 
   /* Definición de sombra personalizada */
   --boxShadow-card: 0 4px 20px rgba(0,0,0,0.4);
