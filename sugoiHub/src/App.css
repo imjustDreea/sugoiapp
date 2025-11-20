@@ -1,14 +1,18 @@
 @import "tailwindcss";
 :root {
-  /* Definición de tus colores como variables CSS */
-  --neon-green: #07D98C;
-  --electric-blue: #4227F2;
-  --soft-pink: #F27EB4;
-  --deep-magenta: #A60D61;
-  --dark-wine: #400224;
+  /* Palette: Neon Noir -> mapping provided by user */
+  --color-bg: #1A1A1A;        /* Noir Void */
+  --accent-violet: #BA8CFF;   /* Vapor Violet */
+  --accent-lime: #C4FF4D;     /* Cyber Lime */
+  --color-grid: #4D4D4D;      /* Grid Gray */
+
+  /* supporting tokens */
+  --color-darkCard: #0f0d12;  /* dark card background (slightly above black) */
+  --muted-foreground: #bdb3e6; /* fallback muted text color */
+  --text-foreground: #e9e9ee; /* main text color */
 
   /* Definición de sombra personalizada */
-  --boxShadow-card: 0 4px 20px rgba(0,0,0,0.4);
+  --boxShadow-card: 0 4px 20px rgba(0,0,0,0.45);
 }
 
 /* Si quieres puedes usar estas variables en utilidades custom */

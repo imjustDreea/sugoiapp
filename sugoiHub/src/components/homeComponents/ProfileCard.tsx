@@ -11,13 +11,13 @@ const ProfileCard = () => {
         <p className="text-sm text-gray-400">Otaku | Gamer | Music lover</p>
       </div>
 
-      <div className="mt-6 space-y-2 text-sm text-gray-300">
+      <div className="mt-6 space-y-2 text-sm text-muted">
         <p className="flex justify-between"><span>📖 Mangas read</span><span>25</span></p>
         <p className="flex justify-between"><span>🎮 Games completed</span><span>10</span></p>
         <p className="flex justify-between"><span>🎵 Playlists created</span><span>8</span></p>
       </div>
 
-      <button className="w-full mt-4 py-2 rounded-xl bg-[#232342] hover:bg-[#2b2b4a] transition">
+      <button className="w-full mt-4 py-2 rounded-xl bg-panel hover:opacity-95 transition">
         Edit profile
       </button>
     </div>
