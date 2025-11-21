@@ -98,3 +98,7 @@ body{
     transition: opacity 160ms ease, transform 160ms ease;
     will-change: opacity, transform;
 }
+
+/* Floating panel visual tweaks */
+.sidebar-seam + .hidden { }
+.sidebar-panel-shadow { box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
