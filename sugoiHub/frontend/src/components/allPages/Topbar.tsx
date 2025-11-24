@@ -31,7 +31,7 @@ const Topbar = () => {
   return (
     <header className="flex items-center justify-between bg-darkPanel p-4 border-b border-gray-800 relative">
       <nav className="flex space-x-4 sm:space-x-8">
-  <NavLink to="/" className={({ isActive }: { isActive?: boolean })=> `text-gray-300 link ${isActive? 'active' : ''}`}>Home</NavLink>
+  <NavLink to="/anime" className={({ isActive }: { isActive?: boolean })=> `text-gray-300 link ${isActive? 'active' : ''}`}>Anime</NavLink>
   <NavLink to="/manga" className={({ isActive }: { isActive?: boolean })=> `text-gray-300 link ${isActive? 'active' : ''}`}>Manga</NavLink>
   <NavLink to="/games" className={({ isActive }: { isActive?: boolean })=> `text-gray-300 link ${isActive? 'active' : ''}`}>Games</NavLink>
   <NavLink to="/music" className={({ isActive }: { isActive?: boolean })=> `text-gray-300 link ${isActive? 'active' : ''}`}>Music</NavLink>
