@@ -1,10 +1,10 @@
 type Game = {
-  id: number;
+  id: string | number;
   title: string;
-  studio: string;
-  platforms: string[];
-  genre: string;
-  rating: number;
+  studio?: string;
+  platforms?: string[];
+  genre?: string;
+  rating?: number;
 };
 
 function coverDataUrl(seed: string, accent = '#BA8CFF') {
@@ -32,13 +32,13 @@ export default function GameCard({ game, onAdd }: { game: Game; onAdd?: (g: Game
           <h3 className="text-lg font-semibold text-white truncate">{game.title}</h3>
           <p className="text-sm text-muted truncate">{game.studio}</p>
 
-          <div className="mt-2 text-sm text-muted flex-1">
-            <div className="mb-2 flex items-center gap-2 text-xs">
-              <span className="text-yellow-400">🎮</span>
-              <span>{game.platforms.join(', ')}</span>
-            </div>
-            <div className="inline-block px-2 py-1 rounded text-xs font-medium status-other">{game.genre}</div>
-          </div>
+                  <div className="mt-2 text-sm text-muted flex-1">
+                    <div className="mb-2 flex items-center gap-2 text-xs">
+                      <span className="text-yellow-400">🎮</span>
+                      <span>{(game.platforms || []).join(', ')}</span>
+                    </div>
+                    <div className="inline-block px-2 py-1 rounded text-xs font-medium status-other">{game.genre || ''}</div>
+                  </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-auto">
             <div className="text-xs text-muted-dim truncate max-w-[50%]">&nbsp;</div>

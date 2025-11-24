@@ -1,11 +1,11 @@
 type Manga = {
-  id: number;
+  id: string | number;
   title: string;
-  author: string;
-  chapters: number;
-  status: "Ongoing" | "Completed" | string;
-  rating: number;
-  genres: string[];
+  author?: string;
+  chapters?: number;
+  status?: "Ongoing" | "Completed" | string;
+  rating?: number;
+  genres?: string[];
 };
 
 function coverDataUrl(seed: string, accent = "#BA8CFF") {
@@ -49,9 +49,9 @@ export default function MangaCard({ manga, onAdd }: { manga: Manga; onAdd?: (m: 
           <div className="mt-3 text-sm text-muted flex-1">
             <div className="mb-2 flex items-center gap-2">
               <span>📚</span>
-              <span className="text-sm">{manga.chapters} chapters</span>
+              <span className="text-sm">{manga.chapters ?? 0} chapters</span>
             </div>
-            <div className={`inline-block px-2 py-1 rounded text-xs font-medium ${manga.status === 'Ongoing' ? 'status-ongoing' : 'status-other'}`}>{manga.status}</div>
+            <div className={`inline-block px-2 py-1 rounded text-xs font-medium ${manga.status === 'Ongoing' ? 'status-ongoing' : 'status-other'}`}>{manga.status || 'Unknown'}</div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-auto">
