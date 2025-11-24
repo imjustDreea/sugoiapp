@@ -1,0 +1,22 @@
+@import "tailwindcss";
+:root {
+  /* Palette: Neon Noir -> mapping provided by user */
+  --color-bg: #1A1A1A;        /* Noir Void */
+  --accent-violet: #BA8CFF;   /* Vapor Violet */
+  --accent-lime: #C4FF4D;     /* Cyber Lime */
+  --color-grid: #4D4D4D;      /* Grid Gray */
+
+  /* supporting tokens */
+  --color-darkCard: #0f0d12;  /* dark card background (slightly above black) */
+  --muted-foreground: #bdb3e6; /* fallback muted text color */
+  --text-foreground: #e9e9ee; /* main text color */
+
+  /* Definición de sombra personalizada */
+  --boxShadow-card: 0 4px 20px rgba(0,0,0,0.45);
+}
+
+/* Si quieres puedes usar estas variables en utilidades custom */
+.custom-card {
+  box-shadow: var(--boxShadow-card);
+  background-color: var(--color-darkCard);
+}
