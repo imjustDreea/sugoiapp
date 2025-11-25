@@ -5,4 +5,10 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  server: {
+    // Ignorar cambios en archivos de entorno que puedan ser tocados por editores
+    watch: {
+      ignored: ['**/.env', '**/.env.*', '**/.ENV']
+    }
+  }
 })
