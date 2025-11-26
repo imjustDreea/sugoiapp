@@ -34,7 +34,11 @@ export default function TestConn() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const columns = users && users.length > 0 ? Object.keys(users[0]) : [];
+  // Preferir columnas específicas del schema `public.users` y ocultar password
+  const preferredCols = ['id', 'username', 'email', 'birthday', 'created_at'];
+  const detectedCols = users && users.length > 0 ? Object.keys(users[0]) : [];
+  const columns = detectedCols.length > 0 ? detectedCols.filter(c => c !== 'password') : preferredCols.filter(() => false);
+
 
   return (
     <div className="mt-4 bg-darkCard rounded-2xl p-4">
@@ -74,9 +78,24 @@ export default function TestConn() {
             <tbody>
               {users.map((u, i) => (
                 <tr key={i} className="border-t border-gray-700">
-                  {columns.map((col) => (
-                    <td key={col} className="pr-4 py-2 align-top">{String((u as any)[col])}</td>
-                  ))}
+                  {columns.map((col) => {
+                    const val = (u as any)[col];
+                    let display = '';
+                    if (col === 'password') display = '••••••';
+                    else if (col === 'birthday' || col === 'created_at') {
+                      try {
+                        display = val ? new Date(val).toLocaleDateString() : '';
+                      } catch {
+                        display = String(val ?? '');
+                      }
+                    } else {
+                      display = String(val ?? '');
+                    }
+
+                    return (
+                      <td key={col} className="pr-4 py-2 align-top">{display}</td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>

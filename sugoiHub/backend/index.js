@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const { supabase } = require('./supabase');
+const { supabase } = require('./supabaseClient');
 
 const app = express();
 app.use(cors());
@@ -16,38 +16,49 @@ app.get('/', (req, res) => {
   res.json({ ok: true, message: 'Sugoi backend running' });
 });
 
+// Mount anime API router
+const animeRouter = require('./api/anime');
+app.use('/api/anime', animeRouter);
+
 // Endpoint de ejemplo: devuelve filas de la tabla `users` (ajusta el nombre si usas otra tabla)
 app.get('/users', async (req, res) => {
+  console.log('Incoming GET /users from', req.ip, 'headers:', {
+    origin: req.get('origin'),
+    host: req.get('host'),
+  });
   try {
-    // Fallback: si no hay service key, devolver datos mock para desarrollo
     if (!process.env.SUPABASE_SERVICE_KEY) {
-      console.warn('SUPABASE_SERVICE_KEY missing — returning mock users for development');
-      const mock = [
-        { id: '00000000-0000-0000-0000-000000000001', email: 'ana@example.com', full_name: 'Ana Pérez', created_at: new Date().toISOString() },
-        { id: '00000000-0000-0000-0000-000000000002', email: 'juan@example.com', full_name: 'Juan López', created_at: new Date().toISOString() },
-        { id: '00000000-0000-0000-0000-000000000003', email: 'marco@example.com', full_name: 'Marco Díaz', created_at: new Date().toISOString() }
-      ];
-      return res.json({ data: mock, mock: true });
+      console.error('SUPABASE_SERVICE_KEY missing — cannot query Supabase. Set SUPABASE_SERVICE_KEY in backend/.env');
+      return res.status(500).json({ error: 'SUPABASE_SERVICE_KEY missing on server' });
     }
 
     const { data, error } = await supabase.from('users').select('*').limit(100);
     if (error) {
-      console.error('Supabase query error:', error);
-      // Si falla la consulta, devolver datos mock para seguir desarrollando
-      const mock = [
-        { id: '00000000-0000-0000-0000-000000000004', email: 'demo1@example.com', full_name: 'Demo Uno', created_at: new Date().toISOString() }
-      ];
-      return res.json({ data: mock, mock: true, supabaseError: error.message || error });
+      console.error('Error fetching users:', error);
+      return res.status(500).json({ error: error.message || error });
     }
+
     console.log('Supabase returned rows:', Array.isArray(data) ? data.length : 0);
     return res.json({ data });
   } catch (e) {
     console.error('Unexpected error in /users:', e);
-    // En caso de excepción, devolver mock para no bloquear el frontend durante desarrollo
-    const mock = [
-      { id: '00000000-0000-0000-0000-000000000005', email: 'fallback@example.com', full_name: 'Fallback User', created_at: new Date().toISOString() }
-    ];
-    return res.json({ data: mock, mock: true, exception: String(e) });
+    return res.status(500).json({ error: String(e) });
+  }
+});
+
+// Diagnostic endpoint: devuelve el número de filas usando head/count
+app.get('/users/count', async (req, res) => {
+  try {
+    const { data, error, count } = await supabase.from('users').select('*', { head: true, count: 'exact' });
+    if (error) {
+      console.error('Supabase count error:', error);
+      return res.status(500).json({ error: error.message || error });
+    }
+    // data will be null when head:true; return count
+    return res.json({ count: typeof count === 'number' ? count : 0 });
+  } catch (e) {
+    console.error('Unexpected error in /users/count:', e);
+    return res.status(500).json({ error: String(e) });
   }
 });
 
