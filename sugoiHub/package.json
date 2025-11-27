@@ -1,0 +1,10 @@
+{
+  "name": "sugoi-root",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "install": "cd backend && npm ci",
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev"
+  }
+}
