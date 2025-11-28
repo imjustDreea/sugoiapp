@@ -1,24 +1,15 @@
 import { useState } from "react";
+import type { Manga } from "../../types";
 import MangaCard from "../manga/MangaCard";
 
-type Manga = {
-  id: string;
-  title: string;
-  author?: string;
-  chapters?: number;
-  status?: "Ongoing" | "Completed" | string;
-  rating?: number;
-  genres?: string[];
-};
-
 export default function MangaPage() {
-  const [mangas, setMangas] = useState<Manga[]>([]);
+  const [mangas] = useState<Manga[]>([]);
 
   // Removed remote API fetch. Use local state or props to populate mangas.
   // If you want placeholder data, set it here or pass via props.
 
-  function handleAdd(m: Manga) {
-    console.log('Add manga', m.id, m.title);
+  function handleAdd(m: any) {
+    console.log('Add manga', m?.id, m?.title);
   }
 
   return (
@@ -36,7 +27,7 @@ export default function MangaPage() {
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch" style={{ gridAutoRows: '1fr' }}>
         {mangas.map((m) => (
           <div className="h-full" key={m.id}>
-            <MangaCard manga={m as any} onAdd={handleAdd} />
+            <MangaCard manga={m} onAdd={handleAdd} />
           </div>
         ))}
       </div>

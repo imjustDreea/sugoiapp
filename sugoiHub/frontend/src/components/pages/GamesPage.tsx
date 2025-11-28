@@ -1,23 +1,15 @@
 import { useState } from "react";
+import type { Game } from "../../types";
 import GameCard from "../games/GameCard";
 
-type Game = {
-  id: string;
-  title: string;
-  studio?: string;
-  platforms?: string[];
-  genre?: string;
-  rating?: number;
-};
-
 export default function GamesPage() {
-  const [games, setGames] = useState<Game[]>([]);
+  const [games] = useState<Game[]>([]);
 
   // Removed remote API fetch. Use local state or props to populate games.
   // If you want placeholder data, set it here or pass via props.
 
-  function handleAdd(g: Game) {
-    console.log('Add game', g.id, g.title);
+  function handleAdd(g: any) {
+    console.log('Add game', g?.id, g?.title);
   }
 
   return (
@@ -35,7 +27,7 @@ export default function GamesPage() {
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch" style={{ gridAutoRows: '1fr' }}>
         {games.map((g) => (
           <div className="h-full" key={g.id}>
-            <GameCard game={g as any} onAdd={handleAdd} />
+            <GameCard game={g} onAdd={handleAdd} />
           </div>
         ))}
       </div>

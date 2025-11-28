@@ -1,13 +1,4 @@
-type Manga = {
-  id: string | number;
-  title: string;
-  author?: string;
-  chapters?: number;
-  status?: "Ongoing" | "Completed" | string;
-  rating?: number;
-  genres?: string[];
-};
-
+import type { Manga } from "../../types";
 function coverDataUrl(seed: string, accent = "#BA8CFF") {
   const svg = `
   <svg xmlns='http://www.w3.org/2000/svg' width='200' height='280'>

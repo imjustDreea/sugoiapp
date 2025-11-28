@@ -1,11 +1,4 @@
-type Game = {
-  id: string | number;
-  title: string;
-  studio?: string;
-  platforms?: string[];
-  genre?: string;
-  rating?: number;
-};
+import type { Game } from "../../types";
 
 function coverDataUrl(seed: string, accent = '#BA8CFF') {
   const svg = `
