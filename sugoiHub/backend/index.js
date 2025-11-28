@@ -14,7 +14,8 @@ console.log('Backend starting. PORT=', process.env.PORT || 4000);
 console.log('SUPABASE_URL present:', !!process.env.SUPABASE_URL);
 console.log('SUPABASE_SERVICE_KEY present:', !!process.env.SUPABASE_SERVICE_KEY);
 
-app.get('/', (req, res) => {
+// Root API health endpoint (avoid using '/' because the SPA uses that path)
+app.get('/api', (req, res) => {
   res.json({ ok: true, message: 'Sugoi backend running' });
 });
 
@@ -23,7 +24,7 @@ const animeRouter = require('./api/anime');
 app.use('/api/anime', animeRouter);
 
 // Endpoint de ejemplo: devuelve filas de la tabla `users` (ajusta el nombre si usas otra tabla)
-app.get('/users', async (req, res) => {
+app.get('/api/users', async (req, res) => {
   console.log('Incoming GET /users from', req.ip, 'headers:', {
     origin: req.get('origin'),
     host: req.get('host'),
@@ -49,7 +50,7 @@ app.get('/users', async (req, res) => {
 });
 
 // Diagnostic endpoint: devuelve el número de filas usando head/count
-app.get('/users/count', async (req, res) => {
+app.get('/api/users/count', async (req, res) => {
   try {
     const { data, error, count } = await supabase.from('users').select('*', { head: true, count: 'exact' });
     if (error) {
