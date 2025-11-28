@@ -1,0 +1,20 @@
+static_sites:
+  - name: sugoiapp-frontend
+    # Build from the frontend folder and publish the Vite output
+    buildCommand: cd frontend && npm ci && npm run build
+    publishPath: frontend/dist
+    branch: main
+    env: node
+    healthCheckPath: /
+
+services:
+  - type: web
+    name: sugoiapp-backend
+    env: node
+    plan: free
+    # Install backend deps; Render will run the startCommand after build
+    buildCommand: cd backend && npm ci
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
