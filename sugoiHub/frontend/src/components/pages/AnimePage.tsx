@@ -46,7 +46,8 @@ export default function AnimePage() {
     setError(null);
     setLoading(true);
     try {
-      let url = `http://localhost:4000/api/anime/search?limit=12`;
+      const apiBase = ((import.meta.env.VITE_BACKEND_URL as string) || '').replace(/\/$/, '');
+      let url = `${apiBase}/api/anime/search?limit=12`;
       if (q) url += `&q=${encodeURIComponent(q)}`;
       if (genre) url += `&genre=${encodeURIComponent(genre)}`;
       const res = await fetch(url);
@@ -85,7 +86,8 @@ export default function AnimePage() {
     setLoading(true);
     setError(null);
     try {
-      const responses = await Promise.all(pick.map(s => fetch(`http://localhost:4000/api/anime/search?q=${encodeURIComponent(s)}`)));
+      const apiBase = ((import.meta.env.VITE_BACKEND_URL as string) || '').replace(/\/$/, '');
+      const responses = await Promise.all(pick.map(s => fetch(`${apiBase}/api/anime/search?q=${encodeURIComponent(s)}`)));
       const jsons = await Promise.all(responses.map(r => r.ok ? r.json() : { results: [] }));
       const merged: any[] = [];
       jsons.forEach(j => {

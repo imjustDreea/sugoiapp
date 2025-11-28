@@ -5,13 +5,17 @@ export default function TestConn() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<any | null>(null);
 
-  const backendUrl = (import.meta.env.VITE_BACKEND_URL as string) ?? 'http://localhost:4000';
+  // If VITE_BACKEND_URL is set (for local dev or custom deployments) use it,
+  // otherwise use a relative path so the frontend talks to the same origin
+  // where the backend is hosted (works when Express serves the SPA).
+  const backendUrlRaw = (import.meta.env.VITE_BACKEND_URL as string) ?? '';
+  const backendUrl = backendUrlRaw.replace(/\/$/, '');
 
   async function fetchUsers() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${backendUrl}/users`);
+  const res = await fetch(`${backendUrl}/users`);
       if (!res.ok) {
         const text = await res.text();
         throw new Error(`HTTP ${res.status}: ${text}`);

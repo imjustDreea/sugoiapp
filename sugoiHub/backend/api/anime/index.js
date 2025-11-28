@@ -1,6 +1,44 @@
 const express = require('express');
 const router = express.Router();
 
+// Simple in-memory cache to reduce requests to Jikan (ttlSeconds)
+const cache = new Map(); // key -> { expires: number, data: any }
+const DEFAULT_TTL = 60; // seconds
+
+function setCache(key, data, ttl = DEFAULT_TTL) {
+  cache.set(key, { expires: Date.now() + ttl * 1000, data });
+}
+
+function getCache(key) {
+  const v = cache.get(key);
+  if (!v) return null;
+  if (Date.now() > v.expires) {
+    cache.delete(key);
+    return null;
+  }
+  return v.data;
+}
+
+// small sleep helper
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+async function fetchWithRetry(url, options = {}, retries = 2, backoffMs = 500) {
+  let attempt = 0;
+  while (true) {
+    try {
+      const r = await (typeof fetch !== 'undefined' ? fetch(url, options) : (await import('node-fetch')).default(url, options));
+      return r;
+    } catch (e) {
+      attempt++;
+      if (attempt > retries) throw e;
+      // exponential backoff
+      await sleep(backoffMs * Math.pow(2, attempt - 1));
+    }
+  }
+}
+
 // Search endpoint: proxy to Jikan
 router.get('/search', async (req, res) => {
   try {
@@ -12,14 +50,18 @@ router.get('/search', async (req, res) => {
     if (q) params.set('q', q);
     params.set('limit', String(limit));
 
-  const url = `https://api.jikan.moe/v4/anime?${params.toString()}`;
-  const _fetch = (typeof fetch !== 'undefined') ? fetch : (await import('node-fetch')).default;
+    const url = `https://api.jikan.moe/v4/anime?${params.toString()}`;
 
-  // Log the proxied URL for debugging
-  console.log('Proxying Jikan request to:', url);
+    // Cache key per exact URL + genreFilter (genre handled after mapping)
+    const cacheKey = `search:${url}:${genreFilter || ''}`;
+    const cached = getCache(cacheKey);
+    if (cached) {
+      return res.json({ results: cached });
+    }
 
-  // Add a User-Agent header and Accept for better compatibility with some APIs
-  const r = await _fetch(url, { headers: { 'Accept': 'application/json', 'User-Agent': 'sugoiapp/1.0 (+https://example.com)' }, timeout: 10000 });
+    console.log('Proxying Jikan request to:', url);
+    const headers = { Accept: 'application/json', 'User-Agent': 'sugoiapp/1.0 (+https://example.com)' };
+    const r = await fetchWithRetry(url, { headers, timeout: 10000 }, 2, 400);
     if (!r.ok) {
       const text = await r.text().catch(() => '');
       console.error('Jikan search error', r.status, text);
@@ -43,6 +85,9 @@ router.get('/search', async (req, res) => {
       results = data.filter((a) => (a.genres || []).some((g) => String(g).toLowerCase().includes(gf)));
     }
 
+    // cache results (short TTL to reduce rate pressure)
+    setCache(cacheKey, results, 60);
+
     return res.json({ results });
   } catch (e) {
     console.error('Error in /api/anime/search', e);
@@ -57,16 +102,20 @@ router.get('/:id', async (req, res) => {
     if (!id) return res.status(400).json({ error: 'Missing id' });
 
     const url = `https://api.jikan.moe/v4/anime/${encodeURIComponent(id)}`;
-    const _fetch = (typeof fetch !== 'undefined') ? fetch : (await import('node-fetch')).default;
+    const cacheKey = `detail:${url}`;
+    const cached = getCache(cacheKey);
+    if (cached) return res.json({ result: cached });
 
-    const r = await _fetch(url, { headers: { 'Accept': 'application/json' } });
+    console.log('Proxying Jikan detail request to:', url);
+    const headers = { Accept: 'application/json', 'User-Agent': 'sugoiapp/1.0 (+https://example.com)' };
+    const r = await fetchWithRetry(url, { headers, timeout: 10000 }, 2, 400);
     if (!r.ok) {
       const text = await r.text().catch(() => '');
       console.error('Jikan anime detail error', r.status, text);
       return res.status(502).json({ error: 'Jikan API error', status: r.status });
     }
 
-    const j = await r.json();
+  const j = await r.json();
     const it = j.data;
     if (!it) return res.status(404).json({ error: 'Not found' });
 
@@ -82,6 +131,7 @@ router.get('/:id', async (req, res) => {
       synopsis: it.synopsis || null,
     };
 
+    setCache(cacheKey, mapped, 300);
     return res.json({ result: mapped });
   } catch (e) {
     console.error('Error in /api/anime/:id', e);
