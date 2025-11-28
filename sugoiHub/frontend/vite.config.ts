@@ -10,5 +10,9 @@ export default defineConfig({
     watch: {
       ignored: ['**/.env', '**/.env.*', '**/.ENV']
     }
+  },
+  build: {
+    // Emitir el build dentro de backend/dist para que Express lo sirva
+    outDir: '../backend/dist'
   }
 })

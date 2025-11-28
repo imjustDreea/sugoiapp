@@ -1,20 +1,15 @@
-static_sites:
-  - name: sugoiapp-frontend
-    # Build from the frontend folder and publish the Vite output
-    buildCommand: cd frontend && npm ci && npm run build
-    publishPath: frontend/dist
-    branch: main
-    env: node
-    healthCheckPath: /
-
+# Single web service deployment: backend will build the frontend into backend/dist
+# and then serve it via Express. This simplifies Render configuration: create a
+# Web Service that runs the backend build (which executes the frontend build)
+# and then starts the backend.
 services:
   - type: web
-    name: sugoiapp-backend
+    name: sugoiapp
     env: node
     plan: free
-    # Install backend deps; Render will run the startCommand after build
-    buildCommand: cd backend && npm ci
+    buildCommand: cd backend && npm ci && npm run build
     startCommand: cd backend && npm start
+    branch: main
     envVars:
       - key: NODE_ENV
         value: production

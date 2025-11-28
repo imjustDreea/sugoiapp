@@ -3,6 +3,8 @@ const cors = require('cors');
 require('dotenv').config();
 const { supabase } = require('./supabaseClient');
 
+const path = require('path');
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -60,6 +62,16 @@ app.get('/users/count', async (req, res) => {
     console.error('Unexpected error in /users/count:', e);
     return res.status(500).json({ error: String(e) });
   }
+});
+
+// Servir archivos estáticos generados por el frontend (build)
+// Si ejecutas `cd ../frontend && npm run build` y la configuración de Vite
+// apunta a ../backend/dist, los archivos estarán en backend/dist
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// SPA fallback: cualquier ruta no conocida por la API debe devolver index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 const port = process.env.PORT || 4000;
