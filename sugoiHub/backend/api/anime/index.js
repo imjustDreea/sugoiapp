@@ -12,10 +12,14 @@ router.get('/search', async (req, res) => {
     if (q) params.set('q', q);
     params.set('limit', String(limit));
 
-    const url = `https://api.jikan.moe/v4/anime?${params.toString()}`;
-    const _fetch = (typeof fetch !== 'undefined') ? fetch : (await import('node-fetch')).default;
+  const url = `https://api.jikan.moe/v4/anime?${params.toString()}`;
+  const _fetch = (typeof fetch !== 'undefined') ? fetch : (await import('node-fetch')).default;
 
-    const r = await _fetch(url, { headers: { 'Accept': 'application/json' } });
+  // Log the proxied URL for debugging
+  console.log('Proxying Jikan request to:', url);
+
+  // Add a User-Agent header and Accept for better compatibility with some APIs
+  const r = await _fetch(url, { headers: { 'Accept': 'application/json', 'User-Agent': 'sugoiapp/1.0 (+https://example.com)' }, timeout: 10000 });
     if (!r.ok) {
       const text = await r.text().catch(() => '');
       console.error('Jikan search error', r.status, text);
