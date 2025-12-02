@@ -22,6 +22,9 @@ app.get('/api', (req, res) => {
 // Mount anime API router
 const animeRouter = require('./api/anime');
 app.use('/api/anime', animeRouter);
+// Mount manga API router
+const mangaRouter = require('./api/manga');
+app.use('/api/manga', mangaRouter);
 
 // Endpoint de ejemplo: devuelve filas de la tabla `users` (ajusta el nombre si usas otra tabla)
 app.get('/api/users', async (req, res) => {
