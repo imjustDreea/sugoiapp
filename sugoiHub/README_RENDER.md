@@ -18,7 +18,7 @@ Flujo que se recomienda en Render (ya reflejado en `render.yaml`):
     - Esto arranca `node index.js` — Express servirá los archivos estáticos en `backend/dist` y las rutas API.
 
 Variables de entorno
-- Configura en la UI de Render las variables necesarias, por ejemplo `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, etc. Asegúrate de añadirlas al servicio `sugoiapp`.
+- Configura en la UI de Render las variables necesarias para tu base de datos de Render. Asegúrate de añadirlas al servicio `sugoiapp`.
 
 Comandos locales para probar el flujo completo
 

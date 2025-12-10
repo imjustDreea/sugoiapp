@@ -16,3 +16,13 @@ export type Manga = {
   rating?: number;
   genres?: string[];
 };
+
+export type Music = {
+  id: string | number;
+  title: string;
+  artist?: string;
+  tracks?: number;
+  year?: number;
+  rating?: number;
+  genres?: string[];
+};

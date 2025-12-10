@@ -10,6 +10,15 @@ export default defineConfig({
     watch: {
       ignored: ['**/.env', '**/.env.*', '**/.ENV']
     }
+    ,
+    // Proxy API requests to backend during development
+    proxy: {
+      '/api': {
+        target: 'http://localhost:4000',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
   },
   build: {
     // Emitir el build dentro de backend/dist para que Express lo sirva
