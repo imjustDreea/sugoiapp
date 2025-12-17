@@ -28,6 +28,19 @@ app.get('/api/db-test', async (req, res) => {
   }
 });
 
+// Listado de usuarios desde public.users (sin exponer contraseña)
+app.get('/api/users', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT id, username, name, last_name AS lastname, email, birth, datecreate AS create_date FROM public.users ORDER BY datecreate DESC NULLS LAST LIMIT 100"
+    );
+    res.json({ ok: true, data: rows });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ ok: false, error: 'No se pudieron obtener los usuarios' });
+  }
+});
+
 // Mount anime API router
 const animeRouter = require('./api/anime');
 app.use('/api/anime', animeRouter);
