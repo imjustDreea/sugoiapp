@@ -1,5 +1,3 @@
-import React from 'react';
-
 type LogoProps = {
   size?: 'xs' | 'sm' | 'md' | 'lg';
   showText?: boolean;

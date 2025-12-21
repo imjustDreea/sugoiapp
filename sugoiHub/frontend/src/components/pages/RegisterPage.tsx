@@ -1,7 +1,7 @@
 import { useContext, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { User, Mail, Lock, Calendar, Check, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Lock, Calendar, Eye, EyeOff } from 'lucide-react';
 import Logo from '../allPages/Logo';
 
 export default function RegisterPage() {
