@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "scripts": {
+    "dev": "concurrently \"cd sugoiHub/backend && node index.js\" \"cd sugoiHub/frontend && npm run dev\""
+  }
+
+}

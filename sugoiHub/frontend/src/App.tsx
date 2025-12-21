@@ -1,6 +1,7 @@
 import './index.css'
 import './App.css'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useContext } from 'react'
 import MainLayout from './layouts/MainLayout'
 import HomePage from './components/pages/HomePage'
 import AnimePage from './components/pages/AnimePage'
@@ -10,12 +11,25 @@ import DiscoverPage from './components/pages/DiscoverPage'
 import CommunityPage from './components/pages/CommunityPage'
 import MusicPage from './components/pages/MusicPage'
 import ProfilePage from './components/pages/ProfilePage'
+import LoginPage from './components/pages/LoginPage'
+import RegisterPage from './components/pages/RegisterPage'
+import { AuthContext } from './context/AuthContext'
+
+function PrivateRoute({ element }: { element: React.ReactNode }) {
+  const auth = useContext(AuthContext);
+  return auth?.token ? element : <Navigate to="/login" />;
+}
 
 export function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<MainLayout />}>
+        {/* Rutas públicas */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        
+        {/* Rutas protegidas */}
+        <Route path="/" element={<PrivateRoute element={<MainLayout />} />}>
           <Route index element={<HomePage />} />
           <Route path="home" element={<HomePage />} />
           <Route path="anime" element={<AnimePage />} />

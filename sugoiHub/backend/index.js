@@ -47,6 +47,9 @@ app.use('/api/anime', animeRouter);
 // Mount manga API router
 const mangaRouter = require('./api/manga');
 app.use('/api/manga', mangaRouter);
+// Mount auth API router
+const authRouter = require('./api/auth');
+app.use('/api/auth', authRouter);
 
 // Servir archivos estáticos generados por el frontend (build)
 // Si ejecutas `cd ../frontend && npm run build` y la configuración de Vite

@@ -1,8 +1,7 @@
-// Configuración de la conexión a PostgreSQL
+
 require('dotenv').config();
 const { Pool } = require('pg');
 
-// Crear pool de conexiones a PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -10,7 +9,6 @@ const pool = new Pool({
   }
 });
 
-// Verificar conexión
 pool.on('connect', () => {
   console.log('Conectado a PostgreSQL');
 });

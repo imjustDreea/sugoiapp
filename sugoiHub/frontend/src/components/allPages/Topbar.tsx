@@ -1,12 +1,15 @@
-import { Settings, Search, X } from "lucide-react";
-import { NavLink } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { Settings, Search, X, LogOut } from "lucide-react";
+import Logo from './Logo';
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useContext } from 'react'
+import { AuthContext } from '../../context/AuthContext'
 
 const Topbar = () => {
-  // showOverlay: controls whether overlay remains mounted in DOM
-  // overlayOpen: controls visual open/close state (for transitions)
+  const navigate = useNavigate();
+  const auth = useContext(AuthContext);
   const [showOverlay, setShowOverlay] = useState(false)
   const [overlayOpen, setOverlayOpen] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -18,24 +21,30 @@ const Topbar = () => {
 
   const handleOpen = () => {
     setShowOverlay(true)
-    // allow next tick for mount, then open for transition
     requestAnimationFrame(() => setOverlayOpen(true))
   }
 
   const handleClose = () => {
     setOverlayOpen(false)
-    // keep mounted until transition ends (200ms)
     window.setTimeout(() => setShowOverlay(false), 220)
   }
 
+  const handleLogout = () => {
+    auth?.logout();
+    navigate('/login');
+  }
+
   return (
-    <header className="flex items-center justify-between bg-darkPanel p-4 border-b border-gray-800 relative">
-      <nav className="flex space-x-4 sm:space-x-8">
+    <header className="flex items-center justify-between bg-darkPanel px-6 py-4 border-b border-gray-800 relative" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '0.5rem' }}>
+      <div className="flex items-center gap-6">
+        <Logo size="xs" showText={false} />
+        <nav className="flex space-x-2 sm:space-x-4">
   <NavLink to="/anime" className={({ isActive }: { isActive?: boolean })=> `text-gray-300 link ${isActive? 'active' : ''}`}>Anime</NavLink>
   <NavLink to="/manga" className={({ isActive }: { isActive?: boolean })=> `text-gray-300 link ${isActive? 'active' : ''}`}>Manga</NavLink>
   <NavLink to="/games" className={({ isActive }: { isActive?: boolean })=> `text-gray-300 link ${isActive? 'active' : ''}`}>Games</NavLink>
   <NavLink to="/music" className={({ isActive }: { isActive?: boolean })=> `text-gray-300 link ${isActive? 'active' : ''}`}>Music</NavLink>
-      </nav>
+        </nav>
+      </div>
 
       <div className="flex items-center gap-4 ml-auto">
         {/* Search: show icon on xs, full input on sm+ */}
@@ -50,6 +59,34 @@ const Topbar = () => {
         <button className="p-2 rounded-lg bg-panel btn-panel transition">
           <Settings size={18} />
         </button>
+
+        {/* Profile Menu */}
+        <div className="relative">
+          <button 
+            onClick={() => setShowProfile(!showProfile)}
+            className="p-2 rounded-lg bg-accent/20 hover:bg-accent/30 text-accent transition text-sm font-medium"
+          >
+            {auth?.user?.username || 'Perfil'}
+          </button>
+          {showProfile && (
+            <div className="absolute right-0 mt-2 bg-darkCard rounded-lg shadow-lg border border-gray-700 min-w-48 z-50">
+              <div className="p-3 border-b border-gray-700">
+                <p className="text-sm text-white font-medium">{auth?.user?.name} {auth?.user?.last_name}</p>
+                <p className="text-xs text-muted">{auth?.user?.email}</p>
+              </div>
+              <NavLink to="/profile" className="block px-4 py-2 text-sm text-gray-300 hover:bg-darkBg transition">
+                Mi perfil
+              </NavLink>
+              <button 
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition text-left"
+              >
+                <LogOut size={16} />
+                Cerrar sesión
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Mobile search overlay */}
