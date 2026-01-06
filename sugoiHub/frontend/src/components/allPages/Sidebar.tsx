@@ -1,4 +1,4 @@
-import { Home, Search, MessageCircle, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { Home, Search, MessageCircle, User, Music, ChevronLeft, ChevronRight } from "lucide-react";
 import Logo from './Logo';
 import { useState } from "react";
 import { NavLink } from 'react-router-dom'
@@ -28,6 +28,9 @@ const Sidebar = () => {
           </NavLink>
           <NavLink to="/community" className={({ isActive }: { isActive?: boolean }) => `sidebar-link flex items-center gap-3 w-full ${collapsed ? 'justify-center p-2.5' : 'px-3 py-2.5'} text-gray-300 ${isActive ? 'active' : ''}`}>
             <MessageCircle size={18} /> <span className={`${collapsed ? 'hidden' : 'hidden sm:inline'} ml-2`}>Community</span>
+          </NavLink>
+          <NavLink to="/music" className={({ isActive }: { isActive?: boolean }) => `sidebar-link flex items-center gap-3 w-full ${collapsed ? 'justify-center p-2.5' : 'px-3 py-2.5'} text-gray-300 ${isActive ? 'active' : ''}`}>
+            <Music size={18} /> <span className={`${collapsed ? 'hidden' : 'hidden sm:inline'} ml-2`}>Music</span>
           </NavLink>
           <NavLink to="/profile" className={({ isActive }: { isActive?: boolean }) => `sidebar-link flex items-center gap-3 w-full ${collapsed ? 'justify-center p-2.5' : 'px-3 py-2.5'} text-gray-300 ${isActive ? 'active' : ''}`}>
             <User size={18} /> <span className={`${collapsed ? 'hidden' : 'hidden sm:inline'} ml-2`}>Profile</span>

@@ -28,9 +28,9 @@ export default function MusicPage(){
         id: it.id ?? it.slug ?? it._id ?? JSON.stringify(it),
         title: it.title ?? it.name ?? it.raw?.title ?? 'Untitled',
         artist: it.artist ?? it.artists ?? it.raw?.artist ?? undefined,
+        image: it.image ?? it.artworkUrl100 ?? it.raw?.image ?? undefined,
         tracks: Number(it.tracks ?? it.raw?.tracks ?? 0) || undefined,
         year: Number(it.year ?? it.release_year ?? it.raw?.year) || undefined,
-        rating: it.score ?? it.rating ?? undefined,
         genres: Array.isArray(it.genres) ? it.genres : (it.raw?.genres || []),
       }));
 

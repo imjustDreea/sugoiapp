@@ -196,7 +196,46 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="pixel-field-label">CONTRASEÑA</label>
+                <div className="flex items-center gap-2">
+                  <label className="pixel-field-label">CONTRASEÑA</label>
+
+                  <div className="relative group">
+                    <button
+                      type="button"
+                      className="w-6 h-6 border-2 border-white/80 bg-black/60 rounded-sm text-xs font-black leading-none flex items-center justify-center"
+                      aria-label="Ver requisitos de contraseña"
+                    >
+                      i
+                    </button>
+
+                    <div className="hidden group-hover:block group-focus-within:block absolute left-0 top-7 z-10 w-64">
+                      <div
+                        className="bg-black/80 border-2 border-white/80 rounded-sm p-3"
+                        style={{ imageRendering: 'pixelated' }}
+                        role="tooltip"
+                      >
+                        <div className="pixel-field-label mb-2 text-accentLime">REQUISITOS</div>
+                        <ul className="text-xs space-y-1">
+                          <li className={passwordCriteria.length ? 'text-accentLime font-black' : 'text-accentLime font-black opacity-70'}>
+                            • Mínimo 8 caracteres
+                          </li>
+                          <li className={passwordCriteria.uppercase ? 'text-accentLime font-black' : 'text-accentLime font-black opacity-70'}>
+                            • 1 mayúscula
+                          </li>
+                          <li className={passwordCriteria.lowercase ? 'text-accentLime font-black' : 'text-accentLime font-black opacity-70'}>
+                            • 1 minúscula
+                          </li>
+                          <li className={passwordCriteria.number ? 'text-accentLime font-black' : 'text-accentLime font-black opacity-70'}>
+                            • 1 número
+                          </li>
+                          <li className={passwordCriteria.special ? 'text-accentLime font-black' : 'text-accentLime font-black opacity-70'}>
+                            • 1 carácter especial
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <div className="pixel-field-row">
                   <div className="pixel-icon-slot" aria-hidden="true">
                     <PixelLockIcon size={22} />

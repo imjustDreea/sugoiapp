@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useState, useEffect, useRef, type ReactNode } from 'react';
 
 type User = {
   id: number;
@@ -23,9 +23,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const didInit = useRef(false);
 
   // Cargar sesión al montar
   useEffect(() => {
+    // En React StrictMode (dev) este efecto puede ejecutarse 2 veces.
+    // Evitamos doble inicialización para no provocar estados inconsistentes.
+    if (didInit.current) return;
+    didInit.current = true;
+
     const savedToken = localStorage.getItem('token');
     if (savedToken) {
       setToken(savedToken);
@@ -43,16 +49,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
-      } else {
+      } else if (res.status === 401 || res.status === 403) {
+        // Token inválido/expirado: cerrar sesión.
         localStorage.removeItem('token');
         setToken(null);
         setUser(null);
+      } else {
+        // Fallo temporal (p.ej. 5xx): no “volatilizar” la sesión.
+        // Dejamos el token para reintentar más tarde.
       }
     } catch (err) {
       console.error('Error fetching user:', err);
-      localStorage.removeItem('token');
-      setToken(null);
-      setUser(null);
+      // Error de red/servidor: no borrar token; evita logout por fallos transitorios.
     } finally {
       setLoading(false);
     }

@@ -9,6 +9,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+async function ensureProfileTable() {
+  // Tabla de perfil 1:1 con users
+  const sql = `
+    CREATE TABLE IF NOT EXISTS public.profile (
+      user_id INTEGER PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
+      avatar_url TEXT,
+      banner_url TEXT,
+      bio TEXT,
+      theme JSONB,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `;
+
+  await pool.query(sql);
+}
+
 // Logging de entorno (no mostrar keys completas)
 console.log('Backend starting. PORT=', process.env.PORT || 4000);
 
@@ -51,6 +67,21 @@ app.use('/api/manga', mangaRouter);
 const authRouter = require('./api/auth');
 app.use('/api/auth', authRouter);
 
+// Mount games API router
+const gamesRouter = require('./api/games');
+app.use('/api/games', gamesRouter);
+
+// Mount music API router
+const musicRouter = require('./api/music');
+app.use('/api/music', musicRouter);
+
+// Mount profile API router
+const profileRouter = require('./api/profile');
+app.use('/api/profile', profileRouter);
+
+// Static uploads (avatars/banners)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Servir archivos estáticos generados por el frontend (build)
 // Si ejecutas `cd ../frontend && npm run build` y la configuración de Vite
 // apunta a ../backend/dist, los archivos estarán en backend/dist
@@ -62,4 +93,11 @@ app.get('*', (req, res) => {
 });
 
 const port = process.env.PORT || 4000;
-app.listen(port, () => console.log(`Sugoi backend listening on ${port}`));
+ensureProfileTable()
+  .then(() => {
+    app.listen(port, () => console.log(`Sugoi backend listening on ${port}`));
+  })
+  .catch((err) => {
+    console.error('Failed ensuring DB tables:', err);
+    process.exit(1);
+  });

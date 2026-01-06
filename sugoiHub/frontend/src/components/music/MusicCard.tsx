@@ -10,11 +10,25 @@ function coverDataUrl(seed: string, accent = '#8FD3FE') {
 }
 
 export default function MusicCard({ album, onAdd }: { album: Music; onAdd?: (m: Music) => void }) {
+  const coverUrl = album.image
+    ? String(album.image).replace('100x100', '300x300')
+    : coverDataUrl(((album.title || '').split(' ')[0]) || 'A');
+
   return (
     <article className="relative rounded-xl border border-grid bg-darkCard p-4 shadow-md overflow-hidden h-full">
       <div className="flex gap-4 h-full">
         <div className="w-28 h-28 rounded-md overflow-hidden flex-shrink-0">
-          <img src={coverDataUrl(((album.title || '').split(' ')[0]) || 'A')} alt={`${album.title} cover`} className="w-full h-full object-cover object-center" />
+          <img
+            src={coverUrl}
+            alt={`${album.title} cover`}
+            className="w-full h-full object-cover object-center"
+            loading="lazy"
+            onError={(e) => {
+              const img = e.currentTarget;
+              img.onerror = null;
+              img.src = coverDataUrl(((album.title || '').split(' ')[0]) || 'A');
+            }}
+          />
         </div>
         <div className="flex-1 min-w-0 flex flex-col">
           <h3 className="text-lg font-semibold text-white truncate">{album.title}</h3>

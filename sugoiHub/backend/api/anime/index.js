@@ -29,6 +29,22 @@ async function fetchWithRetry(url, options = {}, retries = 2, backoffMs = 500) {
   while (true) {
     try {
       const r = await (typeof fetch !== 'undefined' ? fetch(url, options) : (await import('node-fetch')).default(url, options));
+
+      // Retry on rate limiting / transient upstream failures.
+      if (r.status === 429 || (r.status >= 500 && r.status <= 599)) {
+        attempt++;
+        if (attempt > retries) return r;
+
+        const retryAfterHeader = r.headers && typeof r.headers.get === 'function' ? r.headers.get('retry-after') : null;
+        const retryAfterSec = retryAfterHeader ? Number(retryAfterHeader) : NaN;
+        const waitMs = Number.isFinite(retryAfterSec)
+          ? Math.max(0, retryAfterSec) * 1000
+          : backoffMs * Math.pow(2, attempt - 1);
+
+        await sleep(waitMs);
+        continue;
+      }
+
       return r;
     } catch (e) {
       attempt++;

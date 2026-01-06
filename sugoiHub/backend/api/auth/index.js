@@ -2,7 +2,6 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { pool } = require('../../db');
-const auth = require('../../middleware/auth');
 
 const router = express.Router();
 
@@ -65,11 +64,24 @@ router.post('/register', async (req, res) => {
 });
 
 // Perfil del usuario autenticado
-router.get('/me', auth, async (req, res) => {
+router.get('/me', async (req, res) => {
   try {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+    // No estar logueado no es un error: devolvemos user:null
+    if (!token) return res.json({ user: null });
+
+    let payload;
+    try {
+      payload = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret_change_me');
+    } catch (err) {
+      return res.status(401).json({ error: 'Token inválido o expirado' });
+    }
+
     const { rows } = await pool.query(
       'SELECT id, username, name, last_name, email FROM public.users WHERE id=$1',
-      [req.user.id]
+      [payload.id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
     return res.json({ user: rows[0] });

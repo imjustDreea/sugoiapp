@@ -10,15 +10,13 @@ function coverDataUrl(seed: string, accent = '#BA8CFF') {
 }
 
 export default function GameCard({ game, onAdd }: { game: Game; onAdd?: (g: Game) => void }) {
+  const imgSrc = game.image || coverDataUrl(game.title.split(' ')[0]);
+
   return (
     <article className="relative rounded-xl border border-grid bg-darkCard p-3 shadow-md overflow-hidden h-full">
       <div className="flex flex-col sm:flex-row gap-3 h-full">
-        <div className="w-full sm:w-36 h-28 sm:h-20 rounded-md overflow-hidden flex-shrink-0">
-          <img src={coverDataUrl(game.title.split(' ')[0])} alt="cover" className="w-full h-full object-cover object-center" />
-          <div className="absolute top-2 right-2 bg-panel border border-grid px-2 py-1 rounded-md flex items-center gap-2 text-sm text-white">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{color: 'var(--accent-lime)'}}><path d="M12 .587l3.668 7.431L24 9.75l-6 5.848L19.335 24 12 20.201 4.665 24 6 15.598 0 9.75l8.332-1.732z"/></svg>
-            <span className="font-medium">{game.rating}</span>
-          </div>
+        <div className="w-full sm:w-36 h-28 sm:h-20 rounded-md overflow-hidden shrink-0">
+          <img src={imgSrc} alt="cover" className="w-full h-full object-cover object-center" />
         </div>
 
         <div className="flex-1 min-w-0 flex flex-col">

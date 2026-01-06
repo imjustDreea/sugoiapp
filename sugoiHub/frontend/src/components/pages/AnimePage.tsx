@@ -7,9 +7,58 @@ type Anime = {
   status?: string;
   score?: number;
   synopsis?: string;
-  images?: any;
+  images?: unknown;
   genres?: string[];
 };
+
+type AnimeApiResult = Anime & {
+  image?: string;
+  raw_images?: unknown;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  return String(err);
+}
+
+function normalizeAnime(item: unknown): AnimeApiResult | null {
+  if (!isRecord(item)) return null;
+
+  const idRaw = item.id;
+  const id: string | number =
+    typeof idRaw === 'string' || typeof idRaw === 'number'
+      ? idRaw
+      : (typeof item.title === 'string' ? item.title : JSON.stringify(item));
+
+  const title =
+    typeof item.title === 'string'
+      ? item.title
+      : (typeof item.name === 'string' ? item.name : 'Untitled');
+
+  const score = typeof item.score === 'number' ? item.score : undefined;
+  const genres = Array.isArray(item.genres)
+    ? item.genres.filter((g): g is string => typeof g === 'string' && g.trim().length > 0)
+    : undefined;
+
+  const image = typeof item.image === 'string' ? item.image : undefined;
+
+  return {
+    id,
+    title,
+    episodes: typeof item.episodes === 'number' ? item.episodes : undefined,
+    status: typeof item.status === 'string' ? item.status : undefined,
+    score,
+    synopsis: typeof item.synopsis === 'string' ? item.synopsis : undefined,
+    images: item.images,
+    genres,
+    image,
+    raw_images: item.raw_images,
+  };
+}
 
 function coverDataUrl(seed: string, accent = "#BA8CFF") {
   const svg = `
@@ -31,8 +80,10 @@ function coverDataUrl(seed: string, accent = "#BA8CFF") {
 
 export default function AnimePage() {
   const [animes, setAnimes] = useState<Anime[]>([]);
+  const [allAnimes, setAllAnimes] = useState<Anime[]>([]);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('');
   const [error, setError] = useState<string | null>(null);
   const timer = useRef<number | null>(null);
 
@@ -42,22 +93,33 @@ export default function AnimePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function doSearch(q: string, genre?: string) {
+  function applyCategoryFilter(items: AnimeApiResult[], cat?: string): AnimeApiResult[] {
+    if (!cat) return items;
+    const c = String(cat).toLowerCase();
+    return items.filter((a) => (a.genres || []).some((g) => String(g).toLowerCase() === c));
+  }
+
+  async function doSearch(q: string) {
     setError(null);
     setLoading(true);
     try {
       const apiBase = ((import.meta.env.VITE_BACKEND_URL as string) || '').replace(/\/$/, '');
       let url = `${apiBase}/api/anime/search?limit=12`;
       if (q) url += `&q=${encodeURIComponent(q)}`;
-      if (genre) url += `&genre=${encodeURIComponent(genre)}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Status ${res.status}`);
-      const json = await res.json();
-      setAnimes(json.results || []);
-    } catch (err: any) {
+      const json: unknown = await res.json();
+      const resultsRaw = isRecord(json) ? json.results : undefined;
+      const results = Array.isArray(resultsRaw)
+        ? resultsRaw.map(normalizeAnime).filter((x): x is AnimeApiResult => x !== null)
+        : [];
+      setAllAnimes(results);
+      setAnimes(applyCategoryFilter(results, category));
+    } catch (err: unknown) {
       console.error('Failed to load anime', err);
-      setError(err.message || 'Error fetching');
+      setError(getErrorMessage(err) || 'Error fetching');
       setAnimes([]);
+      setAllAnimes([]);
     } finally {
       setLoading(false);
     }
@@ -88,20 +150,33 @@ export default function AnimePage() {
     try {
       const apiBase = ((import.meta.env.VITE_BACKEND_URL as string) || '').replace(/\/$/, '');
       const responses = await Promise.all(pick.map(s => fetch(`${apiBase}/api/anime/search?q=${encodeURIComponent(s)}`)));
-      const jsons = await Promise.all(responses.map(r => r.ok ? r.json() : { results: [] }));
-      const merged: any[] = [];
-      jsons.forEach(j => {
-        (j.results || []).forEach((it: any) => merged.push(it));
+      const jsons: unknown[] = await Promise.all(
+        responses.map((r) => (r.ok ? r.json() : Promise.resolve({ results: [] })))
+      );
+
+      const merged: AnimeApiResult[] = [];
+      jsons.forEach((j) => {
+        const resultsRaw = isRecord(j) ? j.results : undefined;
+        const arr = Array.isArray(resultsRaw) ? resultsRaw : [];
+        arr.map(normalizeAnime)
+          .filter((x): x is AnimeApiResult => x !== null)
+          .forEach((it) => merged.push(it));
       });
+
       // dedupe by id
-      const map = new Map<number | string, any>();
-      merged.forEach(it => { if (!map.has(it.id)) map.set(it.id, it); });
+      const map = new Map<number | string, AnimeApiResult>();
+      merged.forEach((it) => {
+        if (!map.has(it.id)) map.set(it.id, it);
+      });
+
       const final = Array.from(map.values()).slice(0, 12);
-      setAnimes(final);
-    } catch (err: any) {
+      setAllAnimes(final);
+      setAnimes(applyCategoryFilter(final, category));
+    } catch (err: unknown) {
       console.error('Failed to load random anime', err);
-      setError(err.message || 'Error fetching');
+      setError(getErrorMessage(err) || 'Error fetching');
       setAnimes([]);
+      setAllAnimes([]);
     } finally {
       setLoading(false);
     }
@@ -114,11 +189,63 @@ export default function AnimePage() {
     timer.current = window.setTimeout(() => doSearch(v), 400);
   }
 
-  function imgFor(a: any) {
+  const categoryOptions = Array.from(
+    new Set(
+      (allAnimes || [])
+        .flatMap((a) => (a.genres || []))
+        .map((g) => String(g).trim())
+        .filter((g: string) => g.length > 0)
+    )
+  ).sort((a, b) => a.localeCompare(b));
+
+  function imgFor(a: AnimeApiResult) {
     if (!a) return '';
-    if (a.image) return a.image;
-    if (a.raw_images && a.raw_images.jpg) return a.raw_images.jpg.image_url;
+    if (typeof a.image === 'string' && a.image.length > 0) return a.image;
+
+    const raw = a.raw_images;
+    if (isRecord(raw)) {
+      const jpg = raw.jpg;
+      if (isRecord(jpg)) {
+        const imageUrl = jpg.image_url;
+        if (typeof imageUrl === 'string' && imageUrl.length > 0) return imageUrl;
+      }
+    }
+
     return coverDataUrl(((a.title || '')[0] || 'A'));
+  }
+
+  function ratingFromScore(score?: number | null) {
+    if (score == null || Number.isNaN(score)) return null;
+    // Jikan suele devolver score 0..10. Lo normalizamos a 0..5
+    const r = Math.max(0, Math.min(5, score / 2));
+    return r;
+  }
+
+  function Stars({ score }: { score?: number | null }) {
+    const rating = ratingFromScore(score);
+    const filled = rating == null ? 0 : Math.round(rating);
+    return (
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 text-accentLime" aria-label={rating == null ? 'Sin puntuación' : `Puntuación ${filled} de 5`}>
+          {Array.from({ length: 5 }).map((_, i) => {
+            const on = i < filled;
+            return (
+              <svg
+                key={i}
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className={on ? '' : 'opacity-30'}
+              >
+                <path d="M12 .587l3.668 7.431L24 9.75l-6 5.848L19.335 24 12 20.201 4.665 24 6 15.598 0 9.75l8.332-1.732z" />
+              </svg>
+            );
+          })}
+        </div>
+        <div className="text-xs text-muted-dim">{score ?? '—'}</div>
+      </div>
+    );
   }
 
   // no synopsis shown in the card (we intentionally omit description)
@@ -138,21 +265,19 @@ export default function AnimePage() {
             placeholder="Buscar anime..."
             className="bg-dark text-gray-200 px-3 py-2 rounded-xl focus-ring w-full sm:w-64"
           />
-          <select className="bg-dark text-gray-200 px-3 py-2 rounded-xl" onChange={(e) => doSearch(query || '', e.target.value)} defaultValue="">
+          <select
+            className="bg-dark text-gray-200 px-3 py-2 rounded-xl"
+            value={category}
+            onChange={(e) => {
+              const next = e.target.value;
+              setCategory(next);
+              setAnimes(applyCategoryFilter(allAnimes as AnimeApiResult[], next || undefined));
+            }}
+          >
             <option value="">Todas las categorías</option>
-            <option value="Action">Action</option>
-            <option value="Adventure">Adventure</option>
-            <option value="Comedy">Comedy</option>
-            <option value="Drama">Drama</option>
-            <option value="Fantasy">Fantasy</option>
-            <option value="Music">Music</option>
-            <option value="Mystery">Mystery</option>
-            <option value="Romance">Romance</option>
-            <option value="Slice of Life">Slice of Life</option>
-            <option value="Supernatural">Supernatural</option>
-            <option value="Sci-Fi">Sci-Fi</option>
-            <option value="Sports">Sports</option>
-            <option value="Horror">Horror</option>
+            {categoryOptions.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
           </select>
           <button onClick={() => doSearch(query)} className="px-3 py-1 rounded-md btn-accent text-sm font-semibold">Buscar</button>
         </div>
@@ -165,24 +290,60 @@ export default function AnimePage() {
       ) : (
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch" style={{ gridAutoRows: '1fr' }}>
           {animes.map((a) => (
-            <article key={a.id} className="relative rounded-xl border border-grid bg-darkCard p-4 shadow-md overflow-hidden h-full">
-              <div className="flex flex-col sm:flex-row gap-4 h-full">
-                <div className="relative w-full sm:w-28 md:w-32 lg:w-36 h-36 sm:h-32 rounded-md overflow-hidden shrink-0">
-                  <img src={imgFor(a)} alt={`${a.title} cover`} className="w-full h-full object-cover object-center" onError={(e) => { (e.currentTarget as HTMLImageElement).src = coverDataUrl(((a.title || '')[0]) || 'A'); }} />
+            <article
+              key={a.id}
+              className="relative rounded-xl border border-grid shadow-md overflow-hidden h-full"
+              style={{
+                backgroundImage: `url(${imgFor(a)})`,
+                backgroundPosition: 'center',
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat',
+              }}
+            >
+              {/* overlay oscuro + blur (estilo Netflix/Crunchyroll) */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: 'color-mix(in srgb, var(--color-bg) 70%, transparent)',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
+                }}
+              />
+
+              <div className="relative z-10 p-4 flex flex-col gap-3 h-full">
+                {/* rating arriba (sin pisar el póster) */}
+                <div className="flex items-center justify-end">
+                  <div className="bg-panel border border-grid px-2 py-1 rounded-md">
+                    <Stars score={a.score} />
+                  </div>
                 </div>
 
-                <div className="flex-1 min-w-0 flex flex-col">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <h3 className="text-lg font-semibold text-white truncate">{a.title}</h3>
-                      <p className="text-sm text-muted truncate">{a.genres?.join(', ')}</p>
-                    </div>
-                    <div className="text-sm text-muted">{a.score ?? '—'}</div>
+                {/* póster central (como antes) */}
+                <div className="relative flex items-center justify-center">
+                  <div className="w-40 h-52 border-2 border-white/80 bg-black/40 overflow-hidden" style={{ imageRendering: 'pixelated' }}>
+                    <img
+                      src={imgFor(a)}
+                      alt={`${a.title} cover`}
+                      className="w-full h-full object-cover object-center"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = coverDataUrl(((a.title || '')[0]) || 'A');
+                      }}
+                    />
                   </div>
+                </div>
 
-                  <div className="flex items-center gap-2 mt-4">
-                    <button className="px-3 py-1 rounded-md btn-accent text-sm font-semibold">Añadir</button>
+                <div className="min-w-0">
+                  <h3 className="text-lg font-semibold text-white truncate">{a.title}</h3>
+                  <div className="text-xs text-muted-dim truncate">{(a.genres || []).join(' • ')}</div>
+                </div>
+
+                <div className="mt-auto flex items-center justify-between gap-3">
+                  <div className="text-xs text-muted-dim">
+                    {a.episodes ? `${a.episodes} eps` : ''}
+                    {a.episodes && a.status ? ' • ' : ''}
+                    {a.status ? a.status : ''}
                   </div>
+                  <button className="px-3 py-1 rounded-md btn-accent-lime text-sm font-semibold border border-grid">Añadir</button>
                 </div>
               </div>
             </article>
