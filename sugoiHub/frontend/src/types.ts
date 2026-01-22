@@ -29,3 +29,7 @@ export type Music = {
   rating?: number;
   genres?: string[];
 };
+
+export type LibraryType = 'anime' | 'games' | 'manga' | 'music';
+
+export type LibraryListKey = 'favorites' | 'later';

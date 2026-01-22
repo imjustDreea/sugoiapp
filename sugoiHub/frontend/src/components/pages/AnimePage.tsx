@@ -1,4 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { Link } from 'react-router-dom';
+import LikeButton from "../ui/LikeButton";
+import { AuthContext } from "../../context/AuthContext";
+import { useToast } from '../../context/ToastContext';
+import type { LibraryListKey } from "../../types";
+import { getApiBase } from "../../lib/apiBase";
+import { saveToLibrary } from "../../lib/library";
 
 type Anime = {
   id: string | number;
@@ -23,6 +30,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
   return String(err);
+}
+
+function isBannedCategory(name: unknown) {
+  return String(name || '').trim().toLowerCase() === 'hentai';
 }
 
 function normalizeAnime(item: unknown): AnimeApiResult | null {
@@ -79,6 +90,10 @@ function coverDataUrl(seed: string, accent = "#BA8CFF") {
 }
 
 export default function AnimePage() {
+  const auth = useContext(AuthContext);
+  const token = auth?.token;
+  const { showToast } = useToast();
+
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [allAnimes, setAllAnimes] = useState<Anime[]>([]);
   const [loading, setLoading] = useState(false);
@@ -86,6 +101,15 @@ export default function AnimePage() {
   const [category, setCategory] = useState('');
   const [error, setError] = useState<string | null>(null);
   const timer = useRef<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
+  const [likesById, setLikesById] = useState<Record<string, { likes: number; liked: boolean }>>({});
+
+  // Calcular animes paginados
+  const totalPages = Math.ceil(animes.length / itemsPerPage);
+  const startIdx = (currentPage - 1) * itemsPerPage;
+  const paginatedAnimes = animes.slice(startIdx, startIdx + itemsPerPage);
 
   useEffect(() => {
     // initial load: get some random queries
@@ -93,17 +117,117 @@ export default function AnimePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadLikes() {
+      const ids = (animes || []).map((a) => String(a.id));
+      if (ids.length === 0) return;
+
+      const apiBase = getApiBase();
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
+      try {
+        const results = await Promise.all(
+          ids.map(async (id) => {
+            const res = await fetch(`${apiBase}/api/anime/${encodeURIComponent(id)}/likes`, { headers });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) return { id, likes: 0, liked: false };
+            return {
+              id,
+              likes: Number((data as any)?.likes) || 0,
+              liked: Boolean((data as any)?.liked),
+            };
+          })
+        );
+
+        if (cancelled) return;
+        setLikesById((prev) => {
+          const next = { ...prev };
+          for (const r of results) next[r.id] = { likes: r.likes, liked: r.liked };
+          return next;
+        });
+      } catch {
+        // silencioso: likes no son críticos
+      }
+    }
+
+    loadLikes();
+    return () => {
+      cancelled = true;
+    };
+  }, [animes, token]);
+
+  async function handleAddToList(list: LibraryListKey, a: AnimeApiResult) {
+    try {
+      if (!token) {
+        showToast('Inicia sesión para guardar en tus listas.', 'info');
+        return;
+      }
+
+      await saveToLibrary('anime', list, {
+        id: a.id,
+        title: a.title,
+        image: typeof a.image === 'string' ? a.image : undefined,
+        meta: {
+          episodes: a.episodes,
+          status: a.status,
+          score: a.score,
+          genres: a.genres,
+        },
+      }, token);
+
+      showToast('Guardado en tu lista.', 'success');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showToast(msg || 'No se pudo guardar.', 'error');
+    }
+  }
+
+  async function toggleLike(animeId: string | number) {
+    try {
+      if (!token) {
+        showToast('Inicia sesión para dar like.', 'info');
+        return;
+      }
+
+      const apiBase = getApiBase();
+      const res = await fetch(`${apiBase}/api/anime/${encodeURIComponent(String(animeId))}/likes`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error((data as any)?.error || 'No se pudo actualizar el like');
+
+      setLikesById((prev) => ({
+        ...prev,
+        [String(animeId)]: {
+          likes: Number((data as any)?.likes) || 0,
+          liked: Boolean((data as any)?.liked),
+        },
+      }));
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showToast(msg || 'No se pudo actualizar el like', 'error');
+    }
+  }
+
   function applyCategoryFilter(items: AnimeApiResult[], cat?: string): AnimeApiResult[] {
-    if (!cat) return items;
+    // Nunca mostrar hentai
+    const safe = items.filter((a) => !(a.genres || []).some((g) => isBannedCategory(g)));
+
+    if (!cat) return safe;
+    if (isBannedCategory(cat)) return [];
+
     const c = String(cat).toLowerCase();
-    return items.filter((a) => (a.genres || []).some((g) => String(g).toLowerCase() === c));
+    return safe.filter((a) => (a.genres || []).some((g) => String(g).toLowerCase() === c));
   }
 
   async function doSearch(q: string) {
     setError(null);
     setLoading(true);
     try {
-      const apiBase = ((import.meta.env.VITE_BACKEND_URL as string) || '').replace(/\/$/, '');
+      const apiBase = getApiBase();
       let url = `${apiBase}/api/anime/search?limit=12`;
       if (q) url += `&q=${encodeURIComponent(q)}`;
       const res = await fetch(url);
@@ -148,7 +272,7 @@ export default function AnimePage() {
     setLoading(true);
     setError(null);
     try {
-      const apiBase = ((import.meta.env.VITE_BACKEND_URL as string) || '').replace(/\/$/, '');
+      const apiBase = getApiBase();
       const responses = await Promise.all(pick.map(s => fetch(`${apiBase}/api/anime/search?q=${encodeURIComponent(s)}`)));
       const jsons: unknown[] = await Promise.all(
         responses.map((r) => (r.ok ? r.json() : Promise.resolve({ results: [] })))
@@ -194,7 +318,7 @@ export default function AnimePage() {
       (allAnimes || [])
         .flatMap((a) => (a.genres || []))
         .map((g) => String(g).trim())
-        .filter((g: string) => g.length > 0)
+        .filter((g: string) => g.length > 0 && !isBannedCategory(g))
     )
   ).sort((a, b) => a.localeCompare(b));
 
@@ -248,14 +372,14 @@ export default function AnimePage() {
     );
   }
 
+
   // no synopsis shown in the card (we intentionally omit description)
 
   return (
     <section className="py-8">
       <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-white">Anime</h2>
-          <p className="text-sm text-muted-foreground mt-1">Busca anime usando Jikan (resultados desde la API).</p>
+          <h2 className="page-title text-2xl md:text-2.5xl">ANIME</h2>
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -279,20 +403,21 @@ export default function AnimePage() {
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
-          <button onClick={() => doSearch(query)} className="px-3 py-1 rounded-md btn-accent text-sm font-semibold">Buscar</button>
+          <button onClick={() => doSearch(query)} className="pixel-btn pixel-btn-primary pixel-btn-sm">Buscar</button>
         </div>
       </div>
 
       {loading ? (
-        <div>Loading...</div>
+        <div>Cargando...</div>
       ) : error ? (
         <div className="text-red-400">{error}</div>
       ) : (
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch" style={{ gridAutoRows: '1fr' }}>
-          {animes.map((a) => (
+        <>
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch" style={{ gridAutoRows: '1fr' }}>
+            {paginatedAnimes.map((a) => (
             <article
               key={a.id}
-              className="relative rounded-xl border border-grid shadow-md overflow-hidden h-full"
+              className="relative rounded-xl border border-grid shadow-md h-full"
               style={{
                 backgroundImage: `url(${imgFor(a)})`,
                 backgroundPosition: 'center',
@@ -332,10 +457,10 @@ export default function AnimePage() {
                   </div>
                 </div>
 
-                <div className="min-w-0">
-                  <h3 className="text-lg font-semibold text-white truncate">{a.title}</h3>
+                <Link to={`/anime/${a.id}`} className="min-w-0 pointer-events-auto">
+                  <h3 className="text-lg font-semibold text-white truncate hover:text-accentLime transition">{a.title}</h3>
                   <div className="text-xs text-muted-dim truncate">{(a.genres || []).join(' • ')}</div>
-                </div>
+                </Link>
 
                 <div className="mt-auto flex items-center justify-between gap-3">
                   <div className="text-xs text-muted-dim">
@@ -343,12 +468,84 @@ export default function AnimePage() {
                     {a.episodes && a.status ? ' • ' : ''}
                     {a.status ? a.status : ''}
                   </div>
-                  <button className="px-3 py-1 rounded-md btn-accent-lime text-sm font-semibold border border-grid">Añadir</button>
+                  <div className="flex items-center gap-2 pointer-events-auto">
+                    <LikeButton
+                      liked={Boolean(likesById[String(a.id)]?.liked)}
+                      count={likesById[String(a.id)]?.likes ?? 0}
+                      onClick={() => toggleLike(a.id)}
+                      ariaPressed={Boolean(likesById[String(a.id)]?.liked)}
+                    />
+
+                    <details className="relative">
+                      <summary className="pixel-btn pixel-btn-primary pixel-btn-sm flex items-center justify-center gap-1 list-none cursor-pointer min-w-[48px] min-h-[36px]">
+                        + AÑADIR
+                      </summary>
+                      <div className="absolute right-0 bottom-full mb-2 min-w-40 bg-black border-4 border-accentLime rounded-lg overflow-hidden shadow-lg z-50">
+                        {(
+                          [
+                            { key: 'favorites', label: '★ Favoritos' },
+                            { key: 'later', label: '⏱ Más tarde' },
+                          ] as const
+                        ).map((opt) => (
+                          <button
+                            key={opt.key}
+                            type="button"
+                            className="w-full text-left px-4 py-3 pixel-font text-xs text-white hover:bg-accentLime hover:text-black transition-all whitespace-nowrap font-bold tracking-wide"
+                            onClick={(e) => {
+                              handleAddToList(opt.key, a as AnimeApiResult);
+                              const d = (e.currentTarget as HTMLButtonElement).closest('details');
+                              if (d) d.open = false;
+                            }}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </details>
+                  </div>
                 </div>
               </div>
             </article>
           ))}
         </div>
+
+        {/* Paginación */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-8 mb-4">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 rounded-md bg-panel hover:bg-panel/80 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
+            >
+              ← Anterior
+            </button>
+            
+            <div className="flex gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-10 h-10 rounded-md transition text-sm font-medium ${
+                    currentPage === page
+                      ? 'bg-accentViolet text-white'
+                      : 'bg-panel hover:bg-panel/80'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 rounded-md bg-panel hover:bg-panel/80 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
+            >
+              Siguiente →
+            </button>
+          </div>
+        )}
+        </>
       )}
     </section>
   );

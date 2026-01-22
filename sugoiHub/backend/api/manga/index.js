@@ -7,6 +7,16 @@ const DEFAULT_TTL = 60; // seconds
 function setCache(key, data, ttl = DEFAULT_TTL) { cache.set(key, { expires: Date.now() + ttl * 1000, data }); }
 function getCache(key) { const v = cache.get(key); if (!v) return null; if (Date.now() > v.expires) { cache.delete(key); return null; } return v.data; }
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+function hasBannedGenre(genres) {
+  if (!Array.isArray(genres)) return false;
+  return genres.some((g) => String(g || '').trim().toLowerCase() === 'hentai');
+}
+
+function isBannedGenreFilter(filter) {
+  const s = String(filter || '').trim().toLowerCase();
+  return s === 'hentai' || s.includes('hentai');
+}
 async function fetchWithRetry(url, options = {}, retries = 2, backoffMs = 500) {
   let attempt = 0;
   while (true) {
@@ -35,6 +45,11 @@ router.get('/search', async (req, res) => {
     const limit = Math.max(1, Math.min(25, Number.isFinite(requestedLimit) ? requestedLimit : 20));
     const genreFilter = req.query.genre || req.query.category || null;
 
+    // Bloqueo explícito: nunca servir hentai (aunque el usuario lo pida).
+    if (genreFilter && isBannedGenreFilter(genreFilter)) {
+      return res.json({ results: [] });
+    }
+
     const params = new URLSearchParams();
     if (q) params.set('q', q);
     params.set('limit', String(limit));
@@ -48,11 +63,16 @@ router.get('/search', async (req, res) => {
 
     console.log('Proxying Jikan manga search to:', url);
     const headers = { Accept: 'application/json', 'User-Agent': 'sugoiapp-manga/1.0' };
-    const r = await fetchWithRetry(url, { headers, timeout: 10000 }, 2, 400);
+    const r = await fetchWithRetry(url, { headers }, 3, 1000);
     if (!r.ok) {
       const text = await r.text().catch(() => '');
       console.error('Jikan manga search error', r.status, text);
-      return res.status(502).json({ error: 'Jikan API error', status: r.status });
+      const expiredCache = cache.get(cacheKey);
+      if (expiredCache) {
+        console.log('Returning expired cache due to API error');
+        return res.json({ ok: true, results: expiredCache.data, cached: true });
+      }
+      return res.json({ ok: true, results: [] });
     }
 
     const contentType = (r.headers && typeof r.headers.get === 'function') ? (r.headers.get('content-type') || '') : '';
@@ -71,9 +91,11 @@ router.get('/search', async (req, res) => {
     const j = await r.json();
     const items = (j.data || []).map((it) => ({
       id: it.mal_id,
+      mal_id: it.mal_id,
       title: it.title,
+      title_english: it.title_english || null,
       image: it.images?.jpg?.image_url || null,
-      raw_images: it.images || null,
+      images: it.images || null,
       genres: (it.genres || []).map((g) => g.name),
       score: it.score || null,
       chapters: it.chapters || null,
@@ -82,14 +104,17 @@ router.get('/search', async (req, res) => {
       raw: it,
     }));
 
-    let results = items;
+    // Filtro global: eliminar hentai de la API.
+    const withoutHentai = items.filter((m) => !hasBannedGenre(m.genres));
+
+    let results = withoutHentai;
     if (genreFilter) {
       const gf = String(genreFilter).toLowerCase();
-      results = items.filter((m) => (m.genres || []).some((g) => String(g).toLowerCase().includes(gf)));
+      results = withoutHentai.filter((m) => (m.genres || []).some((g) => String(g).toLowerCase().includes(gf)));
     }
 
     setCache(cacheKey, results, 60);
-    return res.json({ results });
+    return res.json({ ok: true, results });
   } catch (e) {
     console.error('Error in /api/manga/search', e);
     return res.status(500).json({ error: String(e) });
@@ -105,15 +130,20 @@ router.get('/:id', async (req, res) => {
     const url = `${JIKAN_BASE}/manga/${encodeURIComponent(id)}`;
     const cacheKey = `manga:detail:${url}`;
     const cached = getCache(cacheKey);
-    if (cached) return res.json({ result: cached });
+    if (cached) return res.json({ ok: true, data: cached });
 
     console.log('Proxying Jikan manga detail to:', url);
     const headers = { Accept: 'application/json', 'User-Agent': 'sugoiapp-manga/1.0' };
-    const r = await fetchWithRetry(url, { headers, timeout: 10000 }, 2, 400);
+    const r = await fetchWithRetry(url, { headers }, 3, 1000);
     if (!r.ok) {
       const text = await r.text().catch(() => '');
       console.error('Jikan manga detail error', r.status, text);
-      return res.status(502).json({ error: 'Jikan API error', status: r.status });
+      const expiredCache = cache.get(cacheKey);
+      if (expiredCache) {
+        console.log('Returning expired cache due to API error');
+        return res.json({ ok: true, data: expiredCache.data, cached: true });
+      }
+      return res.status(502).json({ ok: false, error: 'Jikan API temporalmente no disponible', status: r.status });
     }
 
     const contentType = (r.headers && typeof r.headers.get === 'function') ? (r.headers.get('content-type') || '') : '';
@@ -135,17 +165,25 @@ router.get('/:id', async (req, res) => {
 
     const mapped = {
       id: it.mal_id,
+      mal_id: it.mal_id,
       title: it.title,
+      title_english: it.title_english || null,
       image: it.images?.jpg?.image_url || null,
-      raw_images: it.images || null,
+      images: it.images || null,
       genres: (it.genres || []).map((g) => g.name),
       score: it.score || null,
       chapters: it.chapters || null,
+      volumes: it.volumes || null,
       status: it.status || null,
       synopsis: it.synopsis || null,
+      published: it.published || null,
     };
+
+    if (hasBannedGenre(mapped.genres)) {
+      return res.status(404).json({ error: 'Not found' });
+    }
     setCache(cacheKey, mapped, 300);
-    return res.json({ result: mapped });
+    return res.json({ ok: true, data: mapped });
   } catch (e) {
     console.error('Error in /api/manga/:id', e);
     return res.status(500).json({ error: String(e) });

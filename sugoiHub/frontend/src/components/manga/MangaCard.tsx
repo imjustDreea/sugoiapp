@@ -1,4 +1,9 @@
-import type { Manga } from "../../types";
+import { useContext, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import LikeButton from "../ui/LikeButton";
+import { AuthContext } from "../../context/AuthContext";
+import type { Manga, LibraryListKey } from "../../types";
+import { getApiBase } from "../../lib/apiBase";
 function coverDataUrl(seed: string, accent = "#BA8CFF") {
   const svg = `
   <svg xmlns='http://www.w3.org/2000/svg' width='200' height='280'>
@@ -17,7 +22,62 @@ function coverDataUrl(seed: string, accent = "#BA8CFF") {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
-export default function MangaCard({ manga, onAdd }: { manga: Manga; onAdd?: (m: Manga) => void }) {
+export default function MangaCard({
+  manga,
+  onAddToList,
+}: {
+  manga: Manga;
+  onAddToList?: (list: LibraryListKey, m: Manga) => void;
+}) {
+  const auth = useContext(AuthContext);
+  const token = auth?.token;
+  const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(0);
+
+  // Cargar likes al montar el componente
+  useEffect(() => {
+    const fetchLikes = async () => {
+      const apiBase = getApiBase();
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+      try {
+        const res = await fetch(`${apiBase}/api/media/manga/${encodeURIComponent(String(manga.id))}/likes`, { headers });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setLikes(0);
+          setLiked(false);
+          return;
+        }
+        setLikes(Number((data as any)?.likes) || 0);
+        setLiked(Boolean((data as any)?.liked));
+      } catch (err) {
+        console.error('Error fetching manga likes:', err);
+        setLikes(0);
+        setLiked(false);
+      }
+    };
+
+    if (manga.id && token) {
+      fetchLikes();
+    }
+  }, [manga.id, token]);
+
+  const toggleLike = async () => {
+    if (!token) return;
+    const apiBase = getApiBase();
+    try {
+      const res = await fetch(`${apiBase}/api/media/manga/${encodeURIComponent(String(manga.id))}/likes`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return;
+      setLikes(Number((data as any)?.likes) || 0);
+      setLiked(Boolean((data as any)?.liked));
+    } catch (err) {
+      console.error('Error toggling manga like:', err);
+    }
+  };
+
   function imgFor(m: Manga) {
     return m.image || coverDataUrl(((m.title || "")[0] || 'M'));
   }
@@ -58,7 +118,7 @@ export default function MangaCard({ manga, onAdd }: { manga: Manga; onAdd?: (m: 
 
   return (
     <article
-      className="relative rounded-xl border border-grid shadow-md overflow-hidden h-full"
+      className="relative rounded-xl border border-grid shadow-md h-full"
       style={{
         backgroundImage: `url(${imgFor(manga)})`,
         backgroundPosition: 'center',
@@ -75,14 +135,14 @@ export default function MangaCard({ manga, onAdd }: { manga: Manga; onAdd?: (m: 
         }}
       />
 
-      <div className="relative z-10 p-4 flex flex-col gap-3 h-full">
+      <div className="relative z-10 p-4 flex flex-col gap-3 h-full pointer-events-none">
         <div className="flex items-center justify-end">
           <div className="bg-panel border border-grid px-2 py-1 rounded-md">
             <Stars score={manga.rating ?? null} />
           </div>
         </div>
 
-        <div className="relative flex items-center justify-center">
+        <Link to={`/manga/${manga.id}`} className="relative flex items-center justify-center pointer-events-auto">
           <div className="w-40 h-52 border-2 border-white/80 bg-black/40 overflow-hidden" style={{ imageRendering: 'pixelated' }}>
             <img
               src={imgFor(manga)}
@@ -90,13 +150,13 @@ export default function MangaCard({ manga, onAdd }: { manga: Manga; onAdd?: (m: 
               className="w-full h-full object-cover object-center"
             />
           </div>
-        </div>
+        </Link>
 
-        <div className="min-w-0">
-          <h3 className="text-lg font-semibold text-white truncate">{manga.title}</h3>
+        <Link to={`/manga/${manga.id}`} className="min-w-0 pointer-events-auto">
+          <h3 className="text-lg font-semibold text-white truncate hover:text-accentLime transition">{manga.title}</h3>
           <p className="text-sm text-muted truncate">{manga.author || ''}</p>
           <div className="text-xs text-muted-dim truncate">{(manga.genres || []).join(' • ')}</div>
-        </div>
+        </Link>
 
         <div className="mt-auto flex items-center justify-between gap-3">
           <div className="text-xs text-muted-dim">
@@ -104,12 +164,39 @@ export default function MangaCard({ manga, onAdd }: { manga: Manga; onAdd?: (m: 
             {manga.chapters && manga.status ? ' • ' : ''}
             {manga.status ? manga.status : ''}
           </div>
-          <button
-            onClick={() => onAdd?.(manga)}
-            className="px-3 py-1 rounded-md btn-accent-lime text-sm font-semibold border border-grid"
-          >
-            Añadir
-          </button>
+          <div className="flex items-center gap-2">
+            <LikeButton
+              liked={liked}
+              count={likes}
+              onClick={toggleLike}
+            />
+            <details className="relative pointer-events-auto">
+              <summary className="pixel-btn pixel-btn-primary pixel-btn-sm list-none cursor-pointer">
+                + AÑADIR
+              </summary>
+              <div className="absolute right-0 bottom-full mb-2 min-w-40 bg-black border-4 border-accentLime rounded-lg overflow-hidden shadow-lg z-50">
+                {(
+                  [
+                    { key: 'favorites', label: '★ Favoritos' },
+                    { key: 'later', label: '⏱ Más tarde' },
+                  ] as const
+                ).map((opt) => (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    className="w-full text-left px-4 py-3 pixel-font text-xs text-white hover:bg-accentLime hover:text-black transition-all whitespace-nowrap font-bold tracking-wide"
+                    onClick={(e) => {
+                      onAddToList?.(opt.key, manga);
+                      const d = (e.currentTarget as HTMLButtonElement).closest('details');
+                      if (d) d.open = false;
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </details>
+          </div>
         </div>
       </div>
     </article>

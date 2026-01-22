@@ -9,23 +9,22 @@ export type ThemeKey = 'neon-noir' | 'retro-ocean' | 'soft-neon';
 
 export const THEME_PRESETS: Record<ThemeKey, NeonTheme> = {
   'neon-noir': {
-    colorBg: '#1A1A1A',
-    accentViolet: '#BA8CFF',
-    accentLime: '#C4FF4D',
-    colorGrid: '#4D4D4D'
+    colorBg: '#0D0D0D',
+    accentViolet: '#A855F7',
+    accentLime: '#BFFF00',
+    colorGrid: '#2D2D2D'
   },
-  // inspirado en el ejemplo (#212C47 + #7075b1) con acentos neón suaves
   'retro-ocean': {
-    colorBg: '#212C47',
-    accentViolet: '#7075B1',
-    accentLime: '#7CFFB2',
-    colorGrid: '#3E4A6B'
+    colorBg: '#1A2332',
+    accentViolet: '#60A5FA',
+    accentLime: '#34D399',
+    colorGrid: '#2D3F5F'
   },
   'soft-neon': {
-    colorBg: '#151522',
-    accentViolet: '#FF5CDE',
-    accentLime: '#66FFCC',
-    colorGrid: '#3A3A57'
+    colorBg: '#1A1425',
+    accentViolet: '#E879F9',
+    accentLime: '#5EEAD4',
+    colorGrid: '#2D2438'
   }
 };
 

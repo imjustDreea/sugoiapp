@@ -42,18 +42,17 @@ export default function HomePage() {
   return (
     <section className="py-6 px-4 sm:px-5 lg:px-6 max-w-6xl mx-auto w-full">
       <div className="mb-6">
-        <h2 className="page-title text-2xl md:text-2.5xl">Home</h2>
-        <p className="text-sm text-muted mt-1 leading-relaxed">Bienvenido a SugoiHub — tu tablero personal con recomendaciones y atajos.</p>
+        <h2 className="page-title text-2xl md:text-2.5xl">INICIO</h2>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <div className="bg-darkCard rounded-xl p-6 shadow-card hover:shadow-lg transition-shadow">
-          <h3 className="text-lg font-semibold text-white">Your Feed</h3>
+          <h3 className="text-lg font-semibold text-white">Tu Feed</h3>
           <p className="text-sm text-muted mt-2 leading-relaxed">Aquí aparecerán actualizaciones de tus autores y juegos favoritos.</p>
         </div>
 
         <div className="bg-darkCard rounded-xl p-6 shadow-card hover:shadow-lg transition-shadow">
-          <h3 className="text-lg font-semibold text-white">Recommendations</h3>
+          <h3 className="text-lg font-semibold text-white">Recomendaciones</h3>
           <p className="text-sm text-muted mt-2 leading-relaxed">Basado en tus lecturas y partidas.</p>
         </div>
       </div>

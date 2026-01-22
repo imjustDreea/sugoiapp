@@ -80,7 +80,7 @@ router.get('/search', async (req, res) => {
     const baseResults = cached || null;
     if (!cached) {
       const headers = { Accept: 'application/json', 'User-Agent': 'sugoiapp-games/1.0' };
-      const r = await fetchWithRetry(url, { headers }, 2, 400);
+      const r = await fetchWithRetry(url, { headers }, 3, 1000);
       if (!r.ok) {
         const text = await r.text().catch(() => '');
         console.error('FreeToGame error', r.status, text);
@@ -88,10 +88,17 @@ router.get('/search', async (req, res) => {
         // Si la categoría es inválida, el upstream suele responder 4xx.
         // En ese caso preferimos no romper el UI: devolvemos lista vacía.
         if (category && r.status >= 400 && r.status < 500) {
-          return res.json({ results: [], warning: 'Invalid category', upstreamStatus: r.status });
+          return res.json({ ok: true, results: [], warning: 'Invalid category', upstreamStatus: r.status });
         }
 
-        return res.status(502).json({ error: 'FreeToGame API error', status: r.status });
+        // Intentar devolver cache expirado
+        const expiredCache = cache.get(cacheKey);
+        if (expiredCache) {
+          console.log('Returning expired cache due to API error');
+          return res.json({ ok: true, results: expiredCache.data, cached: true });
+        }
+
+        return res.json({ ok: true, results: [] });
       }
 
       const j = await r.json();
@@ -127,7 +134,7 @@ router.get('/search', async (req, res) => {
       ? filteredByQuery.filter((g) => String(g.genre || '').toLowerCase().includes(category))
       : filteredByQuery;
 
-    return res.json({ results: filteredByCategory.slice(0, limit) });
+    return res.json({ ok: true, results: filteredByCategory.slice(0, limit) });
   } catch (e) {
     console.error('Error in /api/games/search', e);
     return res.status(500).json({ error: String(e) });
@@ -143,14 +150,19 @@ router.get('/:id', async (req, res) => {
     const url = `${FREETOGAME_BASE}/game?id=${encodeURIComponent(id)}`;
     const cacheKey = `games:detail:${url}`;
     const cached = getCache(cacheKey);
-    if (cached) return res.json({ result: cached });
+    if (cached) return res.json({ ok: true, game: cached });
 
     const headers = { Accept: 'application/json', 'User-Agent': 'sugoiapp-games/1.0' };
-    const r = await fetchWithRetry(url, { headers }, 2, 400);
+    const r = await fetchWithRetry(url, { headers }, 3, 1000);
     if (!r.ok) {
       const text = await r.text().catch(() => '');
-      console.error('CheapShark detail error', r.status, text);
-      return res.status(502).json({ error: 'CheapShark API error', status: r.status });
+      console.error('FreeToGame detail error', r.status, text);
+      const expiredCache = cache.get(cacheKey);
+      if (expiredCache) {
+        console.log('Returning expired cache due to API error');
+        return res.json({ ok: true, game: expiredCache.data, cached: true });
+      }
+      return res.status(502).json({ ok: false, error: 'FreeToGame API temporalmente no disponible', status: r.status });
     }
 
     const j = await r.json();
@@ -159,15 +171,20 @@ router.get('/:id', async (req, res) => {
       id: j?.id ?? id,
       title: j?.title ?? 'Untitled',
       image: j?.thumbnail ?? null,
+      image_url: j?.thumbnail ?? null,
+      description: j?.description ?? j?.short_description ?? null,
       studio: j?.publisher ?? j?.developer ?? undefined,
-      platforms: j?.platform ? [String(j.platform)] : [],
+      developers: j?.developer ? [{ name: j.developer }] : [],
+      platforms: j?.platform ? j.platform.split(',').map(p => ({ platform: { name: p.trim() } })) : [],
       genre: j?.genre ?? undefined,
+      genres: j?.genre ? [{ name: j.genre }] : [],
+      released: j?.release_date ?? undefined,
       rating: undefined,
       raw: j
     };
 
     setCache(cacheKey, mapped, 300);
-    return res.json({ result: mapped });
+    return res.json({ ok: true, game: mapped });
   } catch (e) {
     console.error('Error in /api/games/:id', e);
     return res.status(500).json({ error: String(e) });

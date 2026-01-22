@@ -260,7 +260,10 @@ export default function RegisterPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="pixel-field-label">CONFIRMAR</label>
+                <div className="flex items-center gap-2">
+                  <label className="pixel-field-label">CONFIRMAR</label>
+                  <div className="w-6 h-6" />
+                </div>
                 <div className="pixel-field-row">
                   <div className="pixel-icon-slot" aria-hidden="true">
                     <PixelLockIcon size={22} />
@@ -313,21 +316,21 @@ export default function RegisterPage() {
                   </div>
                 </div>
                 <div className="flex justify-between px-2">
-                  <span className="text-red-500 font-black text-xs">WEAK</span>
-                  <span className="text-yellow-400 font-black text-xs">MEDIUM</span>
-                  <span className="text-green-500 font-black text-xs">STRONG</span>
+                  <span className="text-red-500 font-black text-xs">DÉBIL</span>
+                  <span className="text-yellow-400 font-black text-xs">MEDIA</span>
+                  <span className="text-green-500 font-black text-xs">FUERTE</span>
                 </div>
               </div>
             )}
 
-            <button type="submit" disabled={auth.loading} className="pixel-btn mt-2">
+            <button type="submit" disabled={auth.loading} className="pixel-btn pixel-btn-primary pixel-btn-full mt-2">
               {auth.loading ? 'CARGANDO...' : 'REGISTRARSE'}
             </button>
           </form>
 
           <div className="mt-6 pt-6 border-t-2 border-grid">
             <p className="pixel-field-label text-center mb-4">¿YA TIENES CUENTA?</p>
-            <button type="button" onClick={() => navigate('/login')} className="pixel-btn pixel-btn-secondary">
+            <button type="button" onClick={() => navigate('/login')} className="pixel-btn pixel-btn-secondary pixel-btn-full">
               INICIAR SESIÓN
             </button>
           </div>

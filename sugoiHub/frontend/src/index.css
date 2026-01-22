@@ -6,6 +6,31 @@ body{
     min-height: 100vh;
 }
 
+/* Layout safety: avoid width overflows */
+*, *::before, *::after { box-sizing: border-box; }
+img, svg, video, canvas { max-width: 100%; height: auto; display: block; }
+
+/* Prevent long titles/URLs blowing up cards */
+.min-w-0 { min-width: 0; }
+
+/* Consistent button baseline in custom utility buttons */
+.btn-accent, .btn-accent-lime, .btn-panel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* Header action rows (Profile cards, etc.) should wrap on small screens */
+.card-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
 .pixel-art {
     image-rendering: pixelated;
     width: 128px;
@@ -122,13 +147,19 @@ body{
 /* topbar active link */
 .link.active { color: var(--accent-violet); font-weight: 600; }
 
+/* Sidebar container - smooth width transition only */
+.sidebar-container {
+    transition: width 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: width;
+}
+
 /* collapse toggle button in sidebar */
 .sidebar-toggle {
     z-index: 60;
     color: var(--text-foreground);
     border: 1px solid var(--color-grid);
     background-color: var(--color-darkCard);
-    transition: transform 150ms ease, box-shadow 150ms ease, right 150ms ease;
+    transition: transform 150ms ease, box-shadow 150ms ease;
 }
 .sidebar-toggle:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.45); }
 /* Ensure lucide SVGs render with the expected stroke color */
@@ -150,7 +181,33 @@ body{
 .search-overlay.closing .transform { transform: translateY(8px); opacity: 0; }
 
 /* =====================
-   Pixel Anime Hub Menu
+   User Menu Chromatic Animation
+   ===================== */
+
+.user-menu-chromatic {
+  background: linear-gradient(
+    135deg,
+    #BFFF00 0%,
+    #00FFB3 20%,
+    #00B8FF 40%,
+    #B800FF 60%,
+    #FF00E5 80%,
+    #BFFF00 100%
+  );
+  background-size: 400% 400%;
+  animation: chromatic-shift 8s ease infinite;
+}
+
+@keyframes chromatic-shift {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 50% 100%; }
+  50% { background-position: 100% 50%; }
+  75% { background-position: 50% 0%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* =====================
+   Pixel Anime Hub Menu (OLD STYLES - Deprecated)
    ===================== */
 
 .user-menu {
@@ -158,7 +215,11 @@ body{
     padding: 12px;
     border: 2px solid var(--accent-violet);
     border-radius: 10px;
-    background: linear-gradient(180deg, color-mix(in srgb, var(--accent-violet) 14%, transparent), var(--color-bg));
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--accent-violet) 16%, var(--color-bg)),
+        var(--color-bg)
+    );
     box-shadow: 0 10px 28px rgba(0,0,0,0.55);
 }
 
@@ -171,7 +232,7 @@ body{
     height: 40px;
     width: 100%;
     border: 2px solid var(--color-grid);
-    background: color-mix(in srgb, var(--color-darkCard) 78%, transparent);
+    background: color-mix(in srgb, var(--color-darkCard) 92%, var(--color-bg));
     color: var(--text-foreground);
     border-radius: 10px;
     padding: 0 12px;
@@ -197,7 +258,7 @@ body{
     cursor: pointer;
     transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease, border-color 120ms ease;
     font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
+    font-size: 11px;
 }
 
 .user-menu-item:hover,
@@ -233,7 +294,7 @@ body{
     padding: 10px;
     border: 2px solid var(--color-grid);
     border-radius: 10px;
-    background: color-mix(in srgb, var(--color-darkCard) 82%, transparent);
+    background: color-mix(in srgb, var(--color-darkCard) 92%, var(--color-bg));
     overflow: hidden;
 }
 
@@ -266,7 +327,7 @@ body{
 
 .user-menu-username {
     font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text-foreground);
 }
 
@@ -373,6 +434,30 @@ body{
     background: color-mix(in srgb, var(--accent-violet) 18%, transparent);
 }
 
+/* Chip style (más tipo Discord) para nicks/badges */
+.badge-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 9999px;
+    border: 1px solid var(--color-grid);
+    background: color-mix(in srgb, var(--color-darkCard) 88%, var(--color-bg));
+    color: var(--text-foreground);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.badge-chip::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--accent-lime) 70%, var(--accent-violet));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-lime) 18%, transparent);
+}
+
 .pixel-field-label {
     font-family: 'Press Start 2P', monospace;
     font-size: 0.6rem;
@@ -396,27 +481,205 @@ body{
     box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-lime) 22%, transparent);
 }
 
+/* =====================
+   PIXEL BUTTON SYSTEM (Keyboard Style)
+   ===================== */
+
 .pixel-btn {
-    width: 100%;
-    border: 2px solid var(--color-grid);
-    border-radius: 0;
-    padding: 12px 12px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
     font-family: 'Press Start 2P', monospace;
     font-size: 0.65rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: #0b0b0d;
-    background-color: var(--accent-lime);
-    transition: filter 120ms ease, transform 120ms ease;
+    color: #e4e4e7;
+    background: linear-gradient(
+        180deg,
+        #4a4a54 0%,
+        #353542 50%,
+        #2a2a35 100%
+    );
+    border: none;
+    border-radius: 6px;
+    box-shadow: 
+        0 0 0 2px #1a1a24,
+        0 4px 0 0 #1a1a24,
+        0 6px 12px rgba(0,0,0,0.4);
+    cursor: pointer;
+    transition: transform 80ms ease, box-shadow 80ms ease;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-.pixel-btn:hover { filter: brightness(1.03); transform: translateY(-1px); }
-.pixel-btn:active { transform: translateY(0); }
-.pixel-btn:disabled { opacity: 0.6; transform: none; filter: none; }
+.pixel-btn::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: 4px;
+    background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.15) 0%,
+        transparent 50%
+    );
+    pointer-events: none;
+}
 
+.pixel-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 
+        0 0 0 2px #1a1a24,
+        0 5px 0 0 #1a1a24,
+        0 7px 14px rgba(0,0,0,0.5),
+        0 0 20px rgba(191, 255, 0, 0.2);
+}
+
+.pixel-btn:active {
+    transform: translateY(2px);
+    box-shadow: 
+        0 0 0 2px #1a1a24,
+        0 2px 0 0 #1a1a24,
+        0 3px 8px rgba(0,0,0,0.4);
+}
+
+.pixel-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 
+        0 0 0 2px #1a1a24,
+        0 4px 0 0 #1a1a24,
+        0 6px 12px rgba(0,0,0,0.4);
+}
+
+/* Primary button (accent lime) */
+.pixel-btn-primary {
+    background: linear-gradient(
+        180deg,
+        #c9ff33 0%,
+        #BFFF00 50%,
+        #a8e600 100%
+    );
+    color: #0b0b0d;
+}
+
+.pixel-btn-primary::before {
+    background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.35) 0%,
+        transparent 50%
+    );
+}
+
+.pixel-btn-primary:hover {
+    box-shadow: 
+        0 0 0 2px #1a1a24,
+        0 5px 0 0 #1a1a24,
+        0 7px 14px rgba(0,0,0,0.5),
+        0 0 24px rgba(191, 255, 0, 0.4);
+}
+
+/* Secondary button (violet) */
 .pixel-btn-secondary {
-    color: var(--text-foreground);
-    background-color: color-mix(in srgb, var(--accent-violet) 30%, transparent);
+    background: linear-gradient(
+        180deg,
+        #c085ff 0%,
+        #a855f7 50%,
+        #8b3dd9 100%
+    );
+    color: white;
+}
+
+.pixel-btn-secondary::before {
+    background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.25) 0%,
+        transparent 50%
+    );
+}
+
+.pixel-btn-secondary:hover {
+    box-shadow: 
+        0 0 0 2px #1a1a24,
+        0 5px 0 0 #1a1a24,
+        0 7px 14px rgba(0,0,0,0.5),
+        0 0 24px rgba(168, 85, 247, 0.3);
+}
+
+/* Danger button (red) */
+.pixel-btn-danger {
+    background: linear-gradient(
+        180deg,
+        #ff8a9b 0%,
+        #ff6b86 50%,
+        #e64968 100%
+    );
+    color: white;
+}
+
+.pixel-btn-danger::before {
+    background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.25) 0%,
+        transparent 50%
+    );
+}
+
+.pixel-btn-danger:hover {
+    box-shadow: 
+        0 0 0 2px #1a1a24,
+        0 5px 0 0 #1a1a24,
+        0 7px 14px rgba(0,0,0,0.5),
+        0 0 24px rgba(255, 107, 134, 0.3);
+}
+
+/* Small button variant */
+.pixel-btn-sm {
+    padding: 8px 14px;
+    font-size: 0.55rem;
+    border-radius: 4px;
+    box-shadow: 
+        0 0 0 2px #1a1a24,
+        0 3px 0 0 #1a1a24,
+        0 5px 10px rgba(0,0,0,0.4);
+}
+
+.pixel-btn-sm:hover {
+    box-shadow: 
+        0 0 0 2px #1a1a24,
+        0 4px 0 0 #1a1a24,
+        0 6px 12px rgba(0,0,0,0.5),
+        0 0 18px rgba(191, 255, 0, 0.2);
+}
+
+.pixel-btn-sm:active {
+    box-shadow: 
+        0 0 0 2px #1a1a24,
+        0 1px 0 0 #1a1a24,
+        0 2px 6px rgba(0,0,0,0.4);
+}
+
+/* Icon button */
+.pixel-btn-icon {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    flex: 0 0 48px;
+}
+
+.pixel-btn-icon-sm {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    flex: 0 0 36px;
+}
+
+/* Full width */
+.pixel-btn-full {
+    width: 100%;
 }
 
 .pixel-field-row {
@@ -426,34 +689,96 @@ body{
 }
 
 .pixel-icon-slot {
+    position: relative;
     width: 48px;
     height: 48px;
     flex: 0 0 48px;
-    border: 2px solid var(--color-grid);
-    background-color: color-mix(in srgb, var(--color-darkCard) 88%, transparent);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--muted-foreground);
+    background: linear-gradient(
+        180deg,
+        #4a4a54 0%,
+        #353542 50%,
+        #2a2a35 100%
+    );
+    border-radius: 6px;
+    box-shadow: 
+        0 0 0 2px #1a1a24,
+        0 4px 0 0 #1a1a24,
+        0 6px 12px rgba(0,0,0,0.4);
     image-rendering: pixelated;
 }
 
+.pixel-icon-slot::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: 4px;
+    background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.15) 0%,
+        transparent 50%
+    );
+    pointer-events: none;
+}
+
 .pixel-icon-button {
+    position: relative;
     width: 48px;
     height: 48px;
     flex: 0 0 48px;
-    border: 2px solid var(--color-grid);
-    background-color: color-mix(in srgb, var(--color-darkCard) 88%, transparent);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--muted-foreground);
+    color: #e4e4e7;
+    background: linear-gradient(
+        180deg,
+        #4a4a54 0%,
+        #353542 50%,
+        #2a2a35 100%
+    );
+    border: none;
+    border-radius: 6px;
+    box-shadow: 
+        0 0 0 2px #1a1a24,
+        0 4px 0 0 #1a1a24,
+        0 6px 12px rgba(0,0,0,0.4);
     cursor: pointer;
     padding: 0;
+    transition: transform 80ms ease, box-shadow 80ms ease;
+}
+
+.pixel-icon-button::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: 4px;
+    background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.15) 0%,
+        transparent 50%
+    );
+    pointer-events: none;
 }
 
 .pixel-icon-button:hover {
+    transform: translateY(-1px);
     color: var(--accent-lime);
+    box-shadow: 
+        0 0 0 2px #1a1a24,
+        0 5px 0 0 #1a1a24,
+        0 7px 14px rgba(0,0,0,0.5),
+        0 0 20px rgba(191, 255, 0, 0.2);
+}
+
+.pixel-icon-button:active {
+    transform: translateY(2px);
+    box-shadow: 
+        0 0 0 2px #1a1a24,
+        0 2px 0 0 #1a1a24,
+        0 3px 8px rgba(0,0,0,0.4);
 }
 
 .pixel-alert {

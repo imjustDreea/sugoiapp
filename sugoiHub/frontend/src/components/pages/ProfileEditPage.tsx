@@ -9,7 +9,11 @@ type Profile = {
   banner_url: string | null;
   bio: string | null;
   theme: Partial<NeonTheme> | null;
+  badges?: string[] | null;
 };
+
+const BADGE_OPTIONS = ['Retro Gamer', 'Otaku'] as const;
+type BadgeOption = (typeof BADGE_OPTIONS)[number];
 
 export default function ProfileEditPage() {
   const auth = useContext(AuthContext);
@@ -19,6 +23,7 @@ export default function ProfileEditPage() {
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [bio, setBio] = useState('');
+  const [badges, setBadges] = useState<BadgeOption[]>([]);
   const [selectedThemeKey, setSelectedThemeKey] = useState<ThemeKey>('neon-noir');
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<{ avatar: boolean; banner: boolean }>({ avatar: false, banner: false });
@@ -46,6 +51,7 @@ export default function ProfileEditPage() {
         const p = data.profile as Profile;
         setProfile(p);
         setBio(p?.bio || '');
+        setBadges((Array.isArray(p?.badges) ? (p.badges as BadgeOption[]) : []).filter((b) => BADGE_OPTIONS.includes(b)));
 
         if (p?.theme && typeof p.theme === 'object') {
           applyTheme(p.theme);
@@ -63,7 +69,7 @@ export default function ProfileEditPage() {
     };
   }, [token, authHeaders]);
 
-  async function saveProfile(payload: { bio?: string; theme?: Partial<NeonTheme> }) {
+  async function saveProfile(payload: { bio?: string; theme?: Partial<NeonTheme>; badges?: BadgeOption[] }) {
     if (!token) return;
     setSaving(true);
     setError(null);
@@ -71,6 +77,7 @@ export default function ProfileEditPage() {
       const body: Record<string, unknown> = {};
       if (typeof payload.bio === 'string') body.bio = payload.bio;
       if (payload.theme) body.theme = payload.theme;
+      if (payload.badges) body.badges = payload.badges;
 
       const res = await fetch('/api/profile', {
         method: 'PUT',
@@ -88,6 +95,10 @@ export default function ProfileEditPage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function toggleBadge(b: BadgeOption) {
+    setBadges((prev) => (prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]));
   }
 
   async function uploadImage(kind: 'avatar' | 'banner', file: File) {
@@ -129,13 +140,12 @@ export default function ProfileEditPage() {
     <section className="py-6 px-4 sm:px-5 lg:px-6 max-w-6xl mx-auto w-full">
       <div className="mb-6 flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h2 className="page-title text-2xl md:text-2.5xl">Editar perfil</h2>
-          <p className="text-sm text-muted mt-1 leading-relaxed">Aquí editas tu avatar, banner, biografía y tema.</p>
+          <h2 className="page-title text-2xl md:text-2.5xl">EDITAR PERFIL</h2>
         </div>
 
         <button
           type="button"
-          className="h-9 px-3 rounded-lg bg-panel btn-panel transition text-gray-200 border border-grid"
+          className="pixel-btn pixel-btn-secondary pixel-btn-sm"
           onClick={() => navigate('/profile')}
         >
           Volver al perfil
@@ -185,7 +195,7 @@ export default function ProfileEditPage() {
 
                 <button
                   type="button"
-                  className="h-9 px-3 rounded-lg bg-panel btn-panel transition text-gray-200 border border-grid"
+                  className="pixel-btn pixel-btn-secondary pixel-btn-sm"
                   onClick={() => avatarInputRef.current?.click()}
                   disabled={uploading.avatar}
                 >
@@ -193,7 +203,7 @@ export default function ProfileEditPage() {
                 </button>
                 <button
                   type="button"
-                  className="h-9 px-3 rounded-lg bg-panel btn-panel transition text-gray-200 border border-grid"
+                  className="pixel-btn pixel-btn-secondary pixel-btn-sm"
                   onClick={() => bannerInputRef.current?.click()}
                   disabled={uploading.banner}
                 >
@@ -231,7 +241,7 @@ export default function ProfileEditPage() {
                 <h4 className="pixel-font text-[12px] text-white">Biografía</h4>
                 <button
                   type="button"
-                  className="h-9 px-3 rounded-lg btn-accent transition"
+                  className="pixel-btn pixel-btn-primary pixel-btn-sm"
                   onClick={() => void saveProfile({ bio })}
                   disabled={saving}
                 >
@@ -245,6 +255,43 @@ export default function ProfileEditPage() {
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Escribe tu bio…"
               />
+            </div>
+
+            <div className="mt-4 bg-darkCard rounded-xl p-5 shadow-card border border-gray-800/60">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <h4 className="pixel-font text-[12px] text-white">Nicks</h4>
+                <button
+                  type="button"
+                  className="pixel-btn pixel-btn-primary pixel-btn-sm"
+                  onClick={() => void saveProfile({ badges })}
+                  disabled={saving}
+                >
+                  {saving ? 'Guardando…' : 'Guardar nicks'}
+                </button>
+              </div>
+
+              <p className="text-sm text-muted mt-2 leading-relaxed">Elige tus etiquetas (se muestran en el perfil).</p>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {BADGE_OPTIONS.map((b) => {
+                  const active = badges.includes(b);
+                  return (
+                    <button
+                      key={b}
+                      type="button"
+                      onClick={() => toggleBadge(b)}
+                      className={
+                        active
+                          ? 'h-9 px-3 rounded-lg btn-accent transition'
+                          : 'h-9 px-3 rounded-lg bg-panel btn-panel transition text-gray-200 border border-grid'
+                      }
+                      aria-pressed={active}
+                    >
+                      {b}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

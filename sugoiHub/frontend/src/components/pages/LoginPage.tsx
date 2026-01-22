@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import Logo from '../allPages/Logo';
 import { PixelLockIcon, PixelMailIcon } from '../pixel/PixelIcons';
+import Button from '../ui/Button';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -80,17 +81,23 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <button type="submit" disabled={auth.loading} className="pixel-btn">
+            <Button 
+              type="submit" 
+              disabled={auth.loading} 
+              variant="primary"
+              fullWidth
+            >
               {auth.loading ? 'CARGANDO...' : 'ENTRAR'}
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               onClick={() => navigate('/register')}
-              className="pixel-btn pixel-btn-secondary"
+              variant="secondary"
+              fullWidth
             >
               CREAR CUENTA
-            </button>
+            </Button>
           </form>
 
           <div className="mt-6 pixel-field-label text-center">
