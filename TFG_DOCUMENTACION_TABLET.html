@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sugoiapp - Documentación TFG</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --bg: #0f172a;
+            --bg-light: #1e293b;
+            --text: #f1f5f9;
+            --text-dim: #cbd5e1;
+            --accent: #00d9ff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, var(--bg) 0%, #1a1f35 100%);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 2rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .toc {
+            background: var(--bg-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .toc h2 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+
+        .toc ol {
+            list-style-position: inside;
+            padding-left: 1rem;
+        }
+
+        .toc li {
+            margin: 0.5rem 0;
+        }
+
+        .toc a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .toc a:hover {
+            color: var(--secondary);
+            transform: translateX(5px);
+        }
+
+        section {
+            margin: 2rem 0;
+            scroll-margin-top: 100px;
+        }
+
+        h2 {
+            color: var(--accent);
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h3 {
+            color: var(--secondary);
+            font-size: 1.5rem;
+            margin: 1.5rem 0 0.8rem;
+            padding-left: 1rem;
+            border-left: 3px solid var(--accent);
+        }
+
+        h4 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin: 1rem 0 0.5rem;
+        }
+
+        p {
+            margin: 1rem 0;
+            color: var(--text-dim);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .highlight {
+            background: var(--bg-light);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        code {
+            background: var(--bg-light);
+            color: #22ff22;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        pre {
+            background: var(--bg-light);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        pre code {
+            background: none;
+            color: #22ff22;
+            padding: 0;
+        }
+
+        .card {
+            background: var(--bg-light);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.1);
+        }
+
+        .card h4 {
+            color: var(--accent);
+            margin-bottom: 0.8rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: var(--bg-light);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-dim);
+        }
+
+        tr:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+            color: var(--text-dim);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .tech-item {
+            background: var(--bg-light);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .tech-item strong {
+            color: var(--primary);
+        }
+
+        .structure {
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary);
+            font-family: monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 0.2rem;
+            font-weight: 600;
+        }
+
+        .badge.success {
+            background: #22c55e;
+        }
+
+        .badge.warning {
+            background: #f59e0b;
+        }
+
+        .badge.danger {
+            background: #ef4444;
+        }
+
+        .quote {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            font-style: italic;
+            color: var(--text-dim);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: 3rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: var(--secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            h3 {
+                font-size: 1.2rem;
+            }
+
+            .tech-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 0.6rem;
+            }
+
+            pre {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Selection */
+        ::selection {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Back to top button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            z-index: 99;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .back-to-top:hover {
+            background: var(--secondary);
+            transform: translateY(-5px);
+        }
+
+        .back-to-top.show {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 sugoiapp - TFG</h1>
+        <p>Plataforma Full-Stack de Descubrimiento y Recomendación de Contenido Multimedia</p>
+    </div>
+
+    <div class="container">
+        <!-- Tabla de Contenidos -->
+        <div class="toc">
+            <h2>📋 Índice</h2>
+            <ol>
+                <li><a href="#descripcion">Descripción General</a></li>
+                <li><a href="#objetivos">Objetivos del Proyecto</a></li>
+                <li><a href="#arquitectura">Arquitectura General</a></li>
+                <li><a href="#tecnologias">Tecnologías Utilizadas</a></li>
+                <li><a href="#backend">Backend - Node.js + Express</a></li>
+                <li><a href="#frontend">Frontend - React + TypeScript</a></li>
+                <li><a href="#basedatos">Base de Datos</a></li>
+                <li><a href="#api">API REST</a></li>
+                <li><a href="#autenticacion">Autenticación JWT</a></li>
+                <li><a href="#instalacion">Instalación y Configuración</a></li>
+                <li><a href="#funcionalidades">Funcionalidades Implementadas</a></li>
+                <li><a href="#proximos">Próximos Pasos</a></li>
+            </ol>
+        </div>
+
+        <!-- Descripción General -->
+        <section id="descripcion">
+            <h2>📖 Descripción General</h2>
+            
+            <p><strong>sugoiapp</strong> es una plataforma web full-stack diseñada como red social multimedia para explorar, descubrir y recomendar contenido de:</p>
+            
+            <ul>
+                <li>🎬 <strong>Anime</strong> - Series animadas con integración a API Jikan</li>
+                <li>📖 <strong>Manga</strong> - Cómics y mangas digitales</li>
+                <li>🎮 <strong>Videojuegos</strong> - Base de datos de juegos</li>
+                <li>🎵 <strong>Música</strong> - Recomendaciones musicales</li>
+            </ul>
+
+            <p>La aplicación combina características de plataformas como MyAnimeList, TMDB, y redes sociales, permitiendo a los usuarios:</p>
+            <ul>
+                <li>Descubrir contenido multimedia</li>
+                <li>Crear y gestionar bibliotecas personales</li>
+                <li>Compartir recomendaciones con otros usuarios</li>
+                <li>Seguir a otros usuarios e interactuar</li>
+                <li>Personalizar su perfil con temas y badges</li>
+            </ul>
+        </section>
+
+        <!-- Objetivos -->
+        <section id="objetivos">
+            <h2>🎯 Objetivos del Proyecto</h2>
+
+            <h3>Objetivos Generales</h3>
+            <ul>
+                <li>Crear una plataforma integrada para gestionar múltiples tipos de contenido multimedia</li>
+                <li>Permitir que usuarios descubran y compartan recomendaciones</li>
+                <li>Implementar un sistema modular y escalable para futuras integraciones</li>
+            </ul>
+
+            <h3>Objetivos Técnicos</h3>
+            <ul>
+                <li>Desarrollar una API REST robusta con autenticación JWT</li>
+                <li>Crear una interfaz moderna con React/TypeScript/Vite</li>
+                <li>Integrar APIs externas (Jikan, etc.)</li>
+                <li>Implementar persistencia con PostgreSQL</li>
+                <li>Aplicar buenas prácticas de seguridad (bcrypt, JWT)</li>
+            </ul>
+
+            <h3>Objetivos de Usuario</h3>
+            <ul>
+                <li>Registro e inicio de sesión seguro</li>
+                <li>Gestionar biblioteca personal de contenido</li>
+                <li>Crear y compartir posts con la comunidad</li>
+                <li>Ver perfiles públicos y seguir usuarios</li>
+                <li>Marcar contenido como favorito o para ver después</li>
+            </ul>
+        </section>
+
+        <!-- Arquitectura -->
+        <section id="arquitectura">
+            <h2>🏗️ Arquitectura General</h2>
+
+            <h3>Estructura del Proyecto</h3>
+            <div class="structure">
+sugoiapp/
+├── sugoiHub/
+│   ├── backend/      (Node.js + Express)
+│   │   ├── api/      (Rutas REST)
+│   │   ├── middleware/ (Autenticación)
+│   │   ├── uploads/  (Archivos)
+│   │   └── db.js     (PostgreSQL)
+│   │
+│   └── frontend/     (React + TypeScript + Vite)
+│       └── src/
+│           ├── components/
+│           ├── context/
+│           ├── layouts/
+│           └── pages/
+            </div>
+
+            <h3>Flujo de Datos</h3>
+            <p>Usuario (Navegador) → Frontend (React) → Backend (Express API) → PostgreSQL Database</p>
+        </section>
+
+        <!-- Tecnologías -->
+        <section id="tecnologias">
+            <h2>🛠️ Tecnologías Utilizadas</h2>
+
+            <h3>Backend Stack</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Categoría</th>
+                        <th>Tecnología</th>
+                        <th>Versión</th>
+                        <th>Propósito</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Runtime</td>
+                        <td>Node.js</td>
+                        <td>18.x</td>
+                        <td>Ejecución de JavaScript</td>
+                    </tr>
+                    <tr>
+                        <td>Framework</td>
+                        <td>Express.js</td>
+                        <td>4.18.2</td>
+                        <td>Framework web minimalista</td>
+                    </tr>
+                    <tr>
+                        <td>Base de Datos</td>
+                        <td>PostgreSQL</td>
+                        <td>13+</td>
+                        <td>BD relacional robusta</td>
+                    </tr>
+                    <tr>
+                        <td>Autenticación</td>
+                        <td>JWT</td>
+                        <td>9.0.3</td>
+                        <td>Tokens seguros</td>
+                    </tr>
+                    <tr>
+                        <td>Seguridad</td>
+                        <td>bcrypt</td>
+                        <td>6.0.0</td>
+                        <td>Hasheo de contraseñas</td>
+                    </tr>
+                    <tr>
+                        <td>Archivos</td>
+                        <td>Multer</td>
+                        <td>2.0.2</td>
+                        <td>Gestión de uploads</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Frontend Stack</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Categoría</th>
+                        <th>Tecnología</th>
+                        <th>Versión</th>
+                        <th>Propósito</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Framework</td>
+                        <td>React</td>
+                        <td>19.1.1</td>
+                        <td>Librería UI</td>
+                    </tr>
+                    <tr>
+                        <td>Lenguaje</td>
+                        <td>TypeScript</td>
+                        <td>5.9.3</td>
+                        <td>Tipado estático</td>
+                    </tr>
+                    <tr>
+                        <td>Build</td>
+                        <td>Vite</td>
+                        <td>7.1.7</td>
+                        <td>Build ultra-rápido</td>
+                    </tr>
+                    <tr>
+                        <td>Enrutamiento</td>
+                        <td>React Router</td>
+                        <td>6.30.2</td>
+                        <td>Navegación</td>
+                    </tr>
+                    <tr>
+                        <td>Estilos</td>
+                        <td>TailwindCSS</td>
+                        <td>4.1.17</td>
+                        <td>CSS utility-first</td>
+                    </tr>
+                    <tr>
+                        <td>Iconos</td>
+                        <td>Lucide React</td>
+                        <td>0.553.0</td>
+                        <td>Biblioteca de iconos</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Backend -->
+        <section id="backend">
+            <h2>🖥️ Backend - Node.js + Express</h2>
+
+            <h3>Puntos Clave</h3>
+
+            <div class="card">
+                <h4>🗄️ Base de Datos</h4>
+                <p>PostgreSQL con pool de conexiones. Tablas principales:</p>
+                <ul>
+                    <li><code>users</code> - Usuarios registrados</li>
+                    <li><code>profile</code> - Perfiles extendidos (1:1)</li>
+                    <li><code>library_items</code> - Biblioteca personal</li>
+                    <li><code>anime_likes</code> - Likes en anime</li>
+                    <li><code>posts</code> - Posts de comunidad</li>
+                    <li><code>followers</code> - Sistema de seguidores</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h4>🔌 API Endpoints</h4>
+                <p>Estructura modular en <code>api/</code>:</p>
+                <ul>
+                    <li><code>auth/</code> - Login, registro, usuario actual</li>
+                    <li><code>anime/</code> - CRUD anime + caché</li>
+                    <li><code>manga/</code> - CRUD manga</li>
+                    <li><code>games/</code> - CRUD videojuegos</li>
+                    <li><code>music/</code> - CRUD música</li>
+                    <li><code>library/</code> - Biblioteca personal</li>
+                    <li><code>posts/</code> - Posts comunidad</li>
+                    <li><code>profile/</code> - Gestión de perfiles</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h4>⚡ Características Especiales</h4>
+                <ul>
+                    <li>💾 <strong>Caché en memoria</strong> para reducir llamadas a APIs externas</li>
+                    <li>🚫 <strong>Filtrado de contenido</strong> (hentai prohibido)</li>
+                    <li>🔄 <strong>Retry automático</strong> con backoff exponencial</li>
+                    <li>📊 <strong>Migraciones automáticas</strong> de tablas</li>
+                    <li>🔐 <strong>Validación JWT</strong> en todas las rutas protegidas</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Frontend -->
+        <section id="frontend">
+            <h2>🎨 Frontend - React + TypeScript + Vite</h2>
+
+            <h3>Estructura de Componentes</h3>
+
+            <div class="card">
+                <h4>📄 Páginas (Pages)</h4>
+                <p>Componentes enrutables con contenido principal:</p>
+                <ul>
+                    <li>HomePage - Inicio (feed recomendaciones)</li>
+                    <li>AnimePage - Listado y búsqueda de anime</li>
+                    <li>MangaPage - Listado de manga</li>
+                    <li>GamesPage - Catálogo de juegos</li>
+                    <li>MusicPage - Recomendaciones musicales</li>
+                    <li>DiscoverPage - Descubrimiento</li>
+                    <li>CommunityPage - Posts y comunidad</li>
+                    <li>ProfilePageNew - Mi perfil</li>
+                    <li>ProfileEditPage - Editar perfil</li>
+                    <li>PublicProfilePage - Ver perfil de otros</li>
+                    <li>LoginPage / RegisterPage - Autenticación</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h4>🎯 Contextos Globales</h4>
+                <ul>
+                    <li><code>AuthContext</code> - Usuario, token, sesión</li>
+                    <li><code>LikesContext</code> - Estado de likes global</li>
+                    <li><code>ToastContext</code> - Notificaciones toast</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h4>🎮 Componentes Reutilizables</h4>
+                <ul>
+                    <li><code>Button.tsx</code> - Botón con variantes (primary, secondary, danger)</li>
+                    <li><code>LikeButton.tsx</code> - Botón de like con contador</li>
+                    <li><code>MainCard.tsx</code> - Card genérica para contenido</li>
+                    <li>Cards especializadas: GameCard, MangaCard, MusicCard</li>
+                </ul>
+            </div>
+
+            <h3>Enrutamiento</h3>
+            <p>React Router v6 con rutas públicas y protegidas:</p>
+
+            <div class="quote">
+                <strong>Rutas públicas:</strong> /login, /register, /u/:username<br>
+                <strong>Rutas protegidas:</strong> /, /anime, /manga, /games, /music, /profile, etc.
+            </div>
+        </section>
+
+        <!-- Base de Datos -->
+        <section id="basedatos">
+            <h2>📊 Base de Datos</h2>
+
+            <h3>Tabla users</h3>
+            <pre><code>id SERIAL PRIMARY KEY
+username VARCHAR(50) UNIQUE NOT NULL
+email VARCHAR(100) UNIQUE NOT NULL
+password TEXT NOT NULL (hasheada con bcrypt)
+name VARCHAR(100)
+last_name VARCHAR(100)
+created_at TIMESTAMPTZ DEFAULT NOW()</code></pre>
+
+            <h3>Tabla profile (1:1 con users)</h3>
+            <pre><code>user_id INTEGER PRIMARY KEY (FK users)
+avatar_url TEXT
+banner_url TEXT
+bio TEXT
+theme JSONB (colores personalizados)
+badges JSONB (insignias ganadas)</code></pre>
+
+            <h3>Tabla library_items</h3>
+            <pre><code>user_id INTEGER (FK users)
+media_type TEXT ('anime', 'manga', 'games', 'music')
+list_key TEXT ('favorites', 'later', 'completed')
+external_id TEXT
+title TEXT
+image_url TEXT
+meta JSONB (metadata flexible)
+created_at TIMESTAMPTZ
+PRIMARY KEY (user_id, media_type, list_key, external_id)</code></pre>
+
+            <h3>Tabla posts</h3>
+            <pre><code>id SERIAL PRIMARY KEY
+user_id INTEGER (FK users)
+content TEXT NOT NULL
+media_type TEXT
+media_id TEXT
+images JSONB (URLs de imágenes)
+likes_count INTEGER DEFAULT 0
+created_at TIMESTAMPTZ</code></pre>
+
+            <h3>Tabla followers</h3>
+            <pre><code>follower_id INTEGER (FK users)
+following_id INTEGER (FK users)
+created_at TIMESTAMPTZ
+PRIMARY KEY (follower_id, following_id)</code></pre>
+        </section>
+
+        <!-- API REST -->
+        <section id="api">
+            <h2>🌐 API REST</h2>
+
+            <h3>Base URL</h3>
+            <pre><code>Development: http://localhost:3000
+Production: https://sugoihub.onrender.com</code></pre>
+
+            <h3>Autenticación</h3>
+            <p>Todos los endpoints protegidos requieren:</p>
+            <pre><code>Header: Authorization: Bearer &lt;JWT_TOKEN&gt;</code></pre>
+
+            <h3>Endpoints de Autenticación</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Método</th>
+                        <th>Ruta</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>POST</td>
+                        <td>/api/auth/login</td>
+                        <td>Inicio de sesión</td>
+                    </tr>
+                    <tr>
+                        <td>POST</td>
+                        <td>/api/auth/register</td>
+                        <td>Registro de usuario</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td>/api/auth/me</td>
+                        <td>Obtener usuario actual</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Endpoints de Contenido</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Método</th>
+                        <th>Ruta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Anime</td>
+                        <td>GET</td>
+                        <td>/api/anime (búsqueda, filtros)</td>
+                    </tr>
+                    <tr>
+                        <td>Anime</td>
+                        <td>GET</td>
+                        <td>/api/anime/:id (detalle)</td>
+                    </tr>
+                    <tr>
+                        <td>Manga</td>
+                        <td>GET</td>
+                        <td>/api/manga (búsqueda)</td>
+                    </tr>
+                    <tr>
+                        <td>Games</td>
+                        <td>GET</td>
+                        <td>/api/games (catálogo)</td>
+                    </tr>
+                    <tr>
+                        <td>Music</td>
+                        <td>GET</td>
+                        <td>/api/music (búsqueda)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Endpoints de Biblioteca</h3>
+            <pre><code>GET    /api/library/anime/favorites
+POST   /api/library/anime/favorites
+DELETE /api/library/anime/favorites/:id
+
+Tipos: anime, manga, games, music
+Listas: favorites, later, completed</code></pre>
+
+            <h3>Endpoints de Posts</h3>
+            <pre><code>GET    /api/posts (listado)
+POST   /api/posts (crear)
+GET    /api/posts/:id (detalle)
+DELETE /api/posts/:id (eliminar)
+POST   /api/posts/:id/like (marcar like)
+DELETE /api/posts/:id/like (quitar like)</code></pre>
+
+            <h3>Endpoints de Perfiles</h3>
+            <pre><code>GET    /api/profile/:username (perfil público)
+GET    /api/profile/me (mi perfil)
+PUT    /api/profile/me (editar)
+POST   /api/profile/avatar (subir avatar)
+POST   /api/profile/banner (subir banner)</code></pre>
+        </section>
+
+        <!-- Autenticación -->
+        <section id="autenticacion">
+            <h2>🔐 Flujo de Autenticación JWT</h2>
+
+            <h3>1. Registro</h3>
+            <div class="quote">
+                Usuario llena formulario → Frontend valida → POST /api/auth/register → Backend hashea contraseña → Crea usuario + perfil → Genera JWT → Retorna token
+            </div>
+
+            <h3>2. Login</h3>
+            <div class="quote">
+                Usuario introduce credenciales → POST /api/auth/login → Backend valida contraseña → Genera JWT (7 días) → Frontend almacena en localStorage
+            </div>
+
+            <h3>3. Peticiones Autenticadas</h3>
+            <div class="quote">
+                Frontend incluye header Authorization: Bearer &lt;token&gt; → Backend valida JWT → Extrae usuario → Continúa con lógica
+            </div>
+
+            <h3>Características del Token JWT</h3>
+            <pre><code>{
+  "id": 2,
+  "username": "andaa",
+  "email": "andaa@example.com",
+  "iat": 1642432800,
+  "exp": 1643037600
+}</code></pre>
+
+            <p><strong>Validez:</strong> 7 días desde emisión<br>
+            <strong>Almacenamiento:</strong> localStorage (key: 'token')<br>
+            <strong>Seguridad:</strong> Contraseña hasheada con bcrypt (10 rounds)</p>
+        </section>
+
+        <!-- Instalación -->
+        <section id="instalacion">
+            <h2>💻 Instalación y Configuración</h2>
+
+            <h3>Requisitos</h3>
+            <ul>
+                <li>Node.js 18+ (<code>node --version</code>)</li>
+                <li>PostgreSQL 13+ (<code>psql --version</code>)</li>
+                <li>npm 8+ (<code>npm --version</code>)</li>
+            </ul>
+
+            <h3>Paso 1: Clonar Repositorio</h3>
+            <pre><code>git clone https://github.com/imjustDreea/sugoiapp.git
+cd sugoiapp</code></pre>
+
+            <h3>Paso 2: Configurar Backend</h3>
+            <pre><code>cd sugoiHub/backend
+npm install
+
+# Crear archivo .env con:
+DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/sugoiapp
+JWT_SECRET=tu_clave_secreta_muy_segura
+NODE_ENV=development
+PORT=3000
+
+# Iniciar servidor
+npm run dev</code></pre>
+
+            <h3>Paso 3: Configurar Frontend</h3>
+            <pre><code>cd sugoiHub/frontend
+npm install
+
+# Iniciar dev server
+npm run dev</code></pre>
+
+            <h3>Paso 4: Ejecutar Ambos (Recomendado)</h3>
+            <pre><code># Desde raíz del proyecto
+npm run dev
+
+# Backend en http://localhost:3000
+# Frontend en http://localhost:5173</code></pre>
+
+            <h3>Build para Producción</h3>
+            <pre><code># Frontend
+cd sugoiHub/frontend
+npm run build
+npm run preview
+
+# Backend (solo ejecutar)
+npm start</code></pre>
+        </section>
+
+        <!-- Funcionalidades -->
+        <section id="funcionalidades">
+            <h2>✅ Funcionalidades Implementadas</h2>
+
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <strong>🔐 Autenticación</strong>
+                    <span class="badge success">✓</span>
+                    <p>Registro, login, JWT, rutas protegidas, logout</p>
+                </div>
+
+                <div class="tech-item">
+                    <strong>📚 Anime & Manga</strong>
+                    <span class="badge success">✓</span>
+                    <p>Búsqueda, filtrado, integración Jikan, detalles</p>
+                </div>
+
+                <div class="tech-item">
+                    <strong>🎮 Juegos y Música</strong>
+                    <span class="badge success">✓</span>
+                    <p>Catálogo, búsqueda, recomendaciones</p>
+                </div>
+
+                <div class="tech-item">
+                    <strong>👤 Perfiles</strong>
+                    <span class="badge success">✓</span>
+                    <p>Ver, editar, avatar, banner, bio, temas</p>
+                </div>
+
+                <div class="tech-item">
+                    <strong>📖 Biblioteca</strong>
+                    <span class="badge success">✓</span>
+                    <p>Favoritos, watchlist, completados</p>
+                </div>
+
+                <div class="tech-item">
+                    <strong>👥 Sistema Social</strong>
+                    <span class="badge success">✓</span>
+                    <p>Seguir usuarios, posts, likes, comentarios</p>
+                </div>
+
+                <div class="tech-item">
+                    <strong>📁 Carga de Archivos</strong>
+                    <span class="badge success">✓</span>
+                    <p>Avatar, banner, imágenes en posts</p>
+                </div>
+
+                <div class="tech-item">
+                    <strong>🎨 Interfaz Responsiva</strong>
+                    <span class="badge success">✓</span>
+                    <p>Diseño responsive, tema oscuro, pixel art</p>
+                </div>
+            </div>
+
+            <h3>Próximamente</h3>
+            <ul>
+                <li><span class="badge warning">→</span> Documentación OpenAPI/Swagger</li>
+                <li><span class="badge warning">→</span> Tests unitarios e integración</li>
+                <li><span class="badge warning">→</span> WebSockets para notificaciones en tiempo real</li>
+                <li><span class="badge warning">→</span> Más integraciones de APIs externas</li>
+                <li><span class="badge warning">→</span> Sistema de recomendaciones con ML</li>
+                <li><span class="badge warning">→</span> Admin panel</li>
+                <li><span class="badge warning">→</span> Mobile app (React Native)</li>
+            </ul>
+        </section>
+
+        <!-- Próximos Pasos -->
+        <section id="proximos">
+            <h2>🚀 Próximos Pasos y Mejoras</h2>
+
+            <h3>Corto Plazo (v0.2.0)</h3>
+            <ul>
+                <li>Documentación API (OpenAPI/Swagger)</li>
+                <li>Tests unitarios y de integración</li>
+                <li>Optimización de performance</li>
+                <li>Validaciones mejoradas</li>
+                <li>Rate limiting en API</li>
+            </ul>
+
+            <h3>Mediano Plazo (v0.3.0)</h3>
+            <ul>
+                <li>Más integraciones (MyAnimeList, TMDB, Spotify, IGDb)</li>
+                <li>Sistema de comentarios en posts</li>
+                <li>Notificaciones en tiempo real (WebSockets)</li>
+                <li>Mensajes directos</li>
+                <li>Admin panel</li>
+            </ul>
+
+            <h3>Largo Plazo (v1.0.0)</h3>
+            <ul>
+                <li>Mobile app (React Native)</li>
+                <li>Sistema de recomendaciones con ML</li>
+                <li>Community features avanzadas (foros, clubs)</li>
+                <li>Marketplace (merchandise, crowdfunding)</li>
+                <li>Streaming integration</li>
+            </ul>
+
+            <h3>Infraestructura</h3>
+            <ul>
+                <li>CI/CD Pipeline (GitHub Actions)</li>
+                <li>Docker containerization</li>
+                <li>Kubernetes deployment</li>
+                <li>Monitoring y logging (Sentry)</li>
+                <li>Caching estratégico (Redis)</li>
+                <li>CDN para assets</li>
+            </ul>
+        </section>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                <strong>Autor:</strong> andaa | 
+                <strong>Proyecto:</strong> sugoiapp TFG | 
+                <strong>Fecha:</strong> 22 de enero de 2026<br>
+                <a href="https://github.com/imjustDreea/sugoiapp">Ver en GitHub</a>
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.85rem;">
+                Este documento es optimizado para tablets y dispositivos móviles.
+            </p>
+        </div>
+    </div>
+
+    <!-- Back to top button -->
+    <div class="back-to-top" id="backToTop">↑</div>
+
+    <script>
+        // Back to top button functionality
+        const backToTopButton = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 500) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
