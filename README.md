@@ -8,7 +8,7 @@ Un proyecto full‑stack para explorar y recomendar contenido de anime, manga, j
 
 - **Frontend:** Vite, React, TypeScript
 - **Backend:** Node.js, Express
-- **Base de datos & Autenticación:** Supabase
+- **Base de datos:** Neon (PostgreSQL serverless)
 - **APIs externas:** Jikan (API de MyAnimeList)
 - **Estilos:** Tailwind CSS
 
@@ -19,7 +19,7 @@ sugoiHub/
 ├── backend/              # Servidor y API
 │   ├── api/             # Rutas (anime, manga)
 │   ├── index.js         # Punto de entrada del servidor
-│   ├── supabase.js      # Configuración de Supabase
+│   ├── db.js            # Configuración de Neon
 │   └── test_*.js        # Scripts de prueba
 └── frontend/            # Aplicación cliente
     ├── src/             # Componentes, layouts y páginas
@@ -31,7 +31,7 @@ sugoiHub/
 
 - Interfaz moderna para descubrir y recomendar anime, manga, juegos y música
 - Integración con la API de Jikan para datos actualizados de anime y manga
-- Sistema de autenticación y persistencia de datos con Supabase
+- Base de datos PostgreSQL serverless con Neon
 - Arquitectura modular preparada para futuras expansiones
 
 ## 🛠️ Instalación y desarrollo
@@ -62,15 +62,13 @@ Crea un archivo `.env` en las carpetas `backend` y `frontend` con las siguientes
 
 ### Backend
 ```env
-SUPABASE_URL=tu_url_de_supabase
-SUPABASE_KEY=tu_clave_de_supabase
+DATABASE_URL=tu_connection_string_de_neon
 PORT=3000
 ```
 
 ### Frontend
 ```env
-VITE_SUPABASE_URL=tu_url_de_supabase
-VITE_SUPABASE_KEY=tu_clave_de_supabase
+VITE_API_URL=http://localhost:3000
 ```
 
 ## 🧪 Pruebas
@@ -80,7 +78,6 @@ El proyecto incluye scripts de prueba para validar las integraciones:
 ```powershell
 cd sugoiHub\backend
 node test_fetch_jikan.js
-node test-supabase.js
 ```
 
 ## 🤝 Contribuir
