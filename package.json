@@ -1,9 +1,23 @@
 {
+  "name": "sugoiapp",
+  "version": "1.0.0",
+  "description": "Sugoi App - Full Stack Application",
+  "type": "module",
+  "engines": {
+    "node": "18.x"
+  },
+  "scripts": {
+    "dev": "concurrently \"cd sugoiHub/backend && npm run dev\" \"cd sugoiHub/frontend && npm run dev\"",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd sugoiHub/frontend && npm install && npm run build",
+    "build:backend": "cd sugoiHub/backend && npm install",
+    "start": "cd sugoiHub/backend && npm start",
+    "lint": "concurrently \"cd sugoiHub/backend && npm run lint\" \"cd sugoiHub/frontend && npm run lint\""
+  },
   "devDependencies": {
     "concurrently": "^9.2.1"
   },
-  "scripts": {
-    "dev": "concurrently \"cd sugoiHub/backend && npm run dev\" \"cd sugoiHub/frontend && npm run dev\""
-  }
-
+  "keywords": ["react", "vite", "typescript"],
+  "author": "imjustDreea",
+  "license": "MIT"
 }
