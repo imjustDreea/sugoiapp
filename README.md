@@ -1,75 +1,114 @@
-
 # sugoiapp
 
-Un proyecto full‑stack para explorar y recomendar contenido (anime, manga, juegos y más). Este repositorio contiene el frontend en Vite + React + TypeScript y un backend en Node.js que integra servicios como Supabase y la API de Jikan para datos de anime/manga.
+Un proyecto full‑stack para explorar y recomendar contenido de anime, manga, juegos y música. Este repositorio contiene el frontend desarrollado con Vite + React + TypeScript y un backend en Node.js que integra servicios externos y gestión de datos.
 
 **Estado:** En desarrollo
 
-**Principales tecnologías:**
+## 🚀 Tecnologías principales
+
 - **Frontend:** Vite, React, TypeScript
-- **Backend:** Node.js
-- **BD / Auth:** Supabase (cliente y utilidades incluidas)
-- **APIs externas:** Jikan (pruebas incluidas en `test_fetch_jikan.js`)
+- **Backend:** Node.js, Express
+- **Base de datos & Autenticación:** Supabase
+- **APIs externas:** Jikan (API de MyAnimeList)
+- **Estilos:** Tailwind CSS
 
-**Estructura del repositorio**
-- **`sugoiHub/`**: Carpeta principal con el frontend y backend del proyecto
-	- **`backend/`**: Código del servidor (API, integración con Supabase)
-		- `index.js`, `supabase.js`, `supabaseClient.js`, pruebas (`test_fetch_jikan.js`, `test-supabase.js`)
-		- `api/` contiene las rutas de `anime` y `manga`
-	- **`frontend/`**: Aplicación cliente (Vite + React + TypeScript)
-		- `src/` contiene componentes, layouts, páginas y estilos
-		- configuración: `vite.config.ts`, `tsconfig.*`, `tailwind.config.cjs`
+## 📁 Estructura del proyecto
 
-**Qué hace el proyecto**
-- Proporciona una interfaz para descubrir y recomendar anime, manga, juegos y música.
-- Conecta con fuentes externas (por ejemplo Jikan) y persiste datos/usuarios con Supabase.
-- Estructura modular pensada para ampliar con nuevas integraciones y microservicios.
+```
+sugoiHub/
+├── backend/              # Servidor y API
+│   ├── api/             # Rutas (anime, manga)
+│   ├── index.js         # Punto de entrada del servidor
+│   ├── supabase.js      # Configuración de Supabase
+│   └── test_*.js        # Scripts de prueba
+└── frontend/            # Aplicación cliente
+    ├── src/             # Componentes, layouts y páginas
+    ├── vite.config.ts   # Configuración de Vite
+    └── tailwind.config.cjs
+```
 
-**Instalación rápida (desarrollo)**
-Requisitos: `node` (v16+ recomendado) y `npm` o `pnpm`.
+## ✨ Características
 
-Abre una terminal PowerShell y ejecuta:
+- Interfaz moderna para descubrir y recomendar anime, manga, juegos y música
+- Integración con la API de Jikan para datos actualizados de anime y manga
+- Sistema de autenticación y persistencia de datos con Supabase
+- Arquitectura modular preparada para futuras expansiones
+
+## 🛠️ Instalación y desarrollo
+
+### Requisitos previos
+- Node.js v16 o superior
+- npm o pnpm
+
+### Configuración del backend
 
 ```powershell
-# Desde la raíz del repo
 cd sugoiHub\backend
 npm install
-# Ejecuta el backend (usar el script disponible: npm run dev o npm start)
 npm run dev
+```
 
-# En otra terminal, arranca el frontend
-cd ..\frontend
+### Configuración del frontend
+
+```powershell
+cd sugoiHub\frontend
 npm install
 npm run dev
 ```
 
-Si algún `package.json` usa otro script para desarrollo usa `npm start` en su lugar.
+## ⚙️ Variables de entorno
 
-**Variables de entorno**
-- Revisa `sugoiHub/backend` para variables relacionadas con Supabase o claves de API.
-- Crea un fichero `.env` en cada parte (backend/frontend) con las claves necesarias. Por ejemplo:
+Crea un archivo `.env` en las carpetas `backend` y `frontend` con las siguientes variables:
 
+### Backend
+```env
+SUPABASE_URL=tu_url_de_supabase
+SUPABASE_KEY=tu_clave_de_supabase
+PORT=3000
 ```
-SUPABASE_URL=tu_url
-SUPABASE_KEY=tu_key
-JIKAN_API_KEY=opcional
+
+### Frontend
+```env
+VITE_SUPABASE_URL=tu_url_de_supabase
+VITE_SUPABASE_KEY=tu_clave_de_supabase
 ```
 
-**Ejecución de pruebas y utilidades**
-- Hay scripts de prueba en `sugoiHub/backend` como `test_fetch_jikan.js` y `test-supabase.js` para validar integraciones.
+## 🧪 Pruebas
 
-**Contribuir**
-- Crea un fork y abre un PR con una descripción clara del cambio.
-- Para cambios mayores, abre una issue primero para discutir la propuesta.
+El proyecto incluye scripts de prueba para validar las integraciones:
 
-**Ideas y próximos pasos**
-- Añadir documentación de la API (OpenAPI / Swagger) para `sugoiHub/backend`.
-- Integrar CI/CD para despliegues automáticos.
-- Añadir tests unitarios y de integración.
+```powershell
+cd sugoiHub\backend
+node test_fetch_jikan.js
+node test-supabase.js
+```
 
-**Contacto**
-- Autor: andaa (repositorio local: `sugoiapp`)
+## 🤝 Contribuir
 
-—
-Si quieres, adapto el README a formato en inglés, añado badges (ci, license) o incluyo ejemplos concretos de uso de la API. ¿Qué prefieres que haga a continuación?
+Las contribuciones son bienvenidas. Para cambios importantes:
 
+1. Haz un fork del proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📋 Roadmap
+
+- [ ] Documentación de la API con Swagger/OpenAPI
+- [ ] Implementación de CI/CD
+- [ ] Tests unitarios y de integración
+- [ ] Sistema de recomendaciones personalizado
+- [ ] Integración con más APIs de contenido
+
+## 📝 Licencia
+
+Este proyecto está bajo desarrollo personal.
+
+## 👤 Autor
+
+**imjustDreea**
+
+---
+
+Desarrollado con ❤️ para la comunidad otaku
