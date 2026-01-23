@@ -1,33 +1,95 @@
-# Sugoi backend (Node + Supabase)
+# Sugoi Backend (Node + Neon)
 
-Este pequeño servidor Express proporciona un endpoint de ejemplo que consulta Supabase.
+Este servidor Express proporciona la API REST para sugoiapp, conectándose a una base de datos PostgreSQL serverless en Neon.
 
-Pasos rápidos:
+## 🚀 Inicio Rápido
 
-1. Copia `.env.example` a `.env` y rellena las variables:
+### 1. Configurar variables de entorno
 
+Crea un archivo `.env` en la carpeta `backend` con las siguientes variables:
+
+```env
+DATABASE_URL=postgresql://user:password@ep-xxxxx.region.aws.neon.tech/dbname?sslmode=require
+JWT_SECRET=tu_clave_secreta_muy_segura_aqui
+NODE_ENV=development
+PORT=3000
 ```
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_KEY=your_service_role_key_here
-PORT=4000
-```
 
-2. Instala dependencias y arranca el servidor (desde la carpeta `backend`):
+**Importante:**
+- `DATABASE_URL`: Obtén esta URL de conexión desde tu dashboard de Neon
+- `JWT_SECRET`: Genera una clave aleatoria segura para firmar tokens JWT
+- No subas el archivo `.env` al repositorio (ya está en `.gitignore`)
+
+### 2. Instalar dependencias
 
 ```powershell
-cd backend
+cd sugoiHub\backend
 npm install
-npm run dev   # o npm start
 ```
 
-3. Prueba el endpoint:
+### 3. Iniciar el servidor
 
 ```powershell
-Invoke-RestMethod http://localhost:4000/users
-# o con curl
-curl http://localhost:4000/users
+npm run dev   # Modo desarrollo con hot-reload
+# o
+npm start     # Modo producción
 ```
 
-Notas de seguridad:
-- La `SUPABASE_SERVICE_KEY` es la "service_role" key y tiene permisos elevados. No la subas al repositorio.
-- En producción, protege estos endpoints y usa autenticación adecuada.
+El servidor estará disponible en `http://localhost:3000`
+
+## 🧪 Probar la conexión
+
+```powershell
+# Verificar que el servidor está corriendo
+Invoke-RestMethod http://localhost:3000/api
+
+# Probar conexión a la base de datos
+Invoke-RestMethod http://localhost:3000/api/db-test
+
+# Obtener usuarios (requiere autenticación)
+Invoke-RestMethod http://localhost:3000/api/users
+```
+
+## 📁 Estructura
+
+```
+backend/
+├── api/
+│   ├── anime/        # Endpoints de anime (Jikan API)
+│   ├── auth/         # Autenticación y registro
+│   ├── library/      # Biblioteca personal del usuario
+│   ├── manga/        # Endpoints de manga
+│   ├── posts/        # Sistema de posts
+│   └── profile/      # Gestión de perfiles
+├── middleware/
+│   └── auth.js       # Middleware de autenticación JWT
+├── db.js             # Configuración de Neon PostgreSQL
+├── index.js          # Entry point del servidor
+└── .env              # Variables de entorno (no incluido en git)
+```
+
+## 🔐 Seguridad
+
+- Las contraseñas se hashean con `bcrypt` (10 rounds)
+- Autenticación basada en JWT (válido 7 días)
+- Conexión SSL/TLS con Neon
+- Variables sensibles en `.env` (nunca en el código)
+- En producción, usa HTTPS y configura CORS adecuadamente
+
+## 🗄️ Base de Datos
+
+El backend crea automáticamente las tablas necesarias al iniciar:
+- `users` - Usuarios registrados
+- `profile` - Perfiles extendidos
+- `library_items` - Biblioteca multimedia
+- `posts` - Sistema de publicaciones
+- `followers` - Red social
+- `media_likes` - Likes en contenido
+
+## 📝 Scripts disponibles
+
+```powershell
+npm run dev          # Desarrollo (nodemon)
+npm start            # Producción
+node seed-test-data.js  # Poblar con datos de prueba
+```
