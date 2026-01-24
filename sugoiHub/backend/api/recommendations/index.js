@@ -1,15 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../../middleware/auth');
+const https = require('https');
 
-let fetch;
-try {
-  fetch = global.fetch;
-  if (!fetch) {
-    fetch = require('node-fetch').default;
-  }
-} catch (e) {
-  fetch = require('node-fetch').default;
+// Helper para hacer requests HTTPS
+function httpsGet(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          resolve({ status: res.statusCode, data: JSON.parse(data) });
+        } catch (e) {
+          reject(new Error(`Invalid JSON from ${url}`));
+        }
+      });
+    }).on('error', reject).setTimeout(5000, function() {
+      this.destroy();
+      reject(new Error('Request timeout'));
+    });
+  });
 }
 
 const cache = new Map();
@@ -35,17 +46,21 @@ async function fetchWithRetry(url, retries = 2, backoffMs = 500) {
   
   while (attempt <= retries) {
     try {
-      const r = await fetch(url);
+      const response = await httpsGet(url);
       
-      if (r.status === 429 || (r.status >= 500 && r.status <= 599)) {
+      if (response.status === 429 || (response.status >= 500 && response.status <= 599)) {
         attempt++;
-        if (attempt > retries) return r;
+        if (attempt > retries) throw new Error(`API returned ${response.status}`);
         await new Promise(resolve => setTimeout(resolve, backoffMs));
         backoffMs *= 2;
         continue;
       }
       
-      return r;
+      if (response.status !== 200) {
+        throw new Error(`API returned ${response.status}`);
+      }
+      
+      return response;
     } catch (e) {
       lastError = e;
       attempt++;
@@ -93,10 +108,8 @@ router.get('/', authMiddleware, async (req, res) => {
       let animeData = getCache(cacheKey);
       
       if (!animeData) {
-        const r = await fetchWithRetry('https://api.jikan.moe/v4/top/anime?limit=100&page=1&type=tv');
-        if (!r.ok) throw new Error(`Jikan API error: ${r.status}`);
-        const data = await r.json();
-        animeData = data.data || [];
+        const res = await fetchWithRetry('https://api.jikan.moe/v4/top/anime?limit=100&page=1&type=tv');
+        animeData = res.data?.data || [];
         setCache(cacheKey, animeData);
       }
 
@@ -124,10 +137,8 @@ router.get('/', authMiddleware, async (req, res) => {
       let mangaData = getCache(cacheKey);
       
       if (!mangaData) {
-        const r = await fetchWithRetry('https://api.jikan.moe/v4/top/manga?limit=100&page=1');
-        if (!r.ok) throw new Error(`Jikan API error: ${r.status}`);
-        const data = await r.json();
-        mangaData = data.data || [];
+        const res = await fetchWithRetry('https://api.jikan.moe/v4/top/manga?limit=100&page=1');
+        mangaData = res.data?.data || [];
         setCache(cacheKey, mangaData);
       }
 
@@ -155,10 +166,8 @@ router.get('/', authMiddleware, async (req, res) => {
       let musicData = getCache(cacheKey);
       
       if (!musicData) {
-        const r = await fetchWithRetry('https://api.jikan.moe/v4/top/anime?limit=50&page=2');
-        if (!r.ok) throw new Error(`Jikan API error: ${r.status}`);
-        const data = await r.json();
-        musicData = data.data || [];
+        const res = await fetchWithRetry('https://api.jikan.moe/v4/top/anime?limit=50&page=2');
+        musicData = res.data?.data || [];
         setCache(cacheKey, musicData);
       }
 
