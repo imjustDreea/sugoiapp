@@ -42,7 +42,8 @@ export default function MusicPage() {
   const itemsPerPage = 20;
 
   const [likesById, setLikesById] = useState<Record<string, { likes: number; liked: boolean }>>({});
-ular albums paginados
+
+  // Calcular albums paginados
   const totalPages = Math.ceil(albums.length / itemsPerPage);
   const startIdx = (currentPage - 1) * itemsPerPage;
   const paginatedAlbums = albums.slice(startIdx, startIdx + itemsPerPage);
