@@ -1,14 +1,6 @@
 import { NavLink } from 'react-router-dom';
-import { type ReactNode, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-
-type MenuItemProps = {
-  icon: ReactNode;
-  label: string;
-  onClick?: () => void;
-  danger?: boolean;
-  shortcut?: string;
-};
 
 type UserStats = {
   level: number;
@@ -18,111 +10,6 @@ type UserStats = {
   totalFavorites: number;
   totalLater: number;
 };
-
-function MenuItem({ icon, label, onClick, danger, shortcut }: MenuItemProps) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all group ${
-        danger
-          ? 'text-red-400 hover:bg-red-500/10 hover:border-red-500/30 border border-transparent'
-          : 'text-gray-300 hover:bg-accentLime/10 hover:text-accentLime border border-transparent hover:border-accentLime/20'
-      }`}
-    >
-      <div className="flex items-center gap-3">
-        <span className="text-lg" aria-hidden>
-          {icon}
-        </span>
-        <span className="text-xs font-semibold tracking-wide pixel-font">{label}</span>
-      </div>
-      {shortcut && (
-        <span className="text-[9px] text-muted pixel-font opacity-60 group-hover:opacity-100 transition-opacity">
-          {shortcut}
-        </span>
-      )}
-    </button>
-  );
-}
-
-function PixelIconWrap({ children }: { children: ReactNode }) {
-  return (
-    <span className="inline-flex items-center justify-center w-5 h-5" style={{ imageRendering: 'pixelated' }}>
-      {children}
-    </span>
-  );
-}
-
-function PixelSearchIcon() {
-  return (
-    <PixelIconWrap>
-      <svg width="20" height="20" viewBox="0 0 20 20" shapeRendering="crispEdges" aria-hidden>
-        <rect x="2" y="2" width="10" height="10" fill="currentColor" opacity="0.15" />
-        <rect x="3" y="3" width="8" height="8" fill="currentColor" opacity="0.25" />
-        <rect x="4" y="4" width="6" height="6" fill="currentColor" />
-        <rect x="12" y="12" width="2" height="2" fill="currentColor" />
-        <rect x="14" y="14" width="2" height="2" fill="currentColor" />
-        <rect x="15" y="15" width="2" height="2" fill="currentColor" />
-      </svg>
-    </PixelIconWrap>
-  );
-}
-
-function PixelGearIcon() {
-  return (
-    <PixelIconWrap>
-      <svg width="20" height="20" viewBox="0 0 20 20" shapeRendering="crispEdges" aria-hidden>
-        <rect x="8" y="2" width="4" height="2" fill="currentColor" />
-        <rect x="2" y="8" width="2" height="4" fill="currentColor" />
-        <rect x="16" y="8" width="2" height="4" fill="currentColor" />
-        <rect x="8" y="16" width="4" height="2" fill="currentColor" />
-        <rect x="6" y="6" width="8" height="8" fill="currentColor" opacity="0.25" />
-        <rect x="7" y="7" width="6" height="6" fill="currentColor" opacity="0.35" />
-        <rect x="8" y="8" width="4" height="4" fill="currentColor" />
-      </svg>
-    </PixelIconWrap>
-  );
-}
-
-function PixelAvatarIcon() {
-  return (
-    <PixelIconWrap>
-      <svg width="20" height="20" viewBox="0 0 20 20" shapeRendering="crispEdges" aria-hidden>
-        <rect x="4" y="3" width="12" height="12" rx="2" fill="currentColor" opacity="0.18" />
-        <rect x="6" y="5" width="8" height="8" rx="2" fill="currentColor" opacity="0.28" />
-        <rect x="8" y="7" width="1" height="1" fill="currentColor" />
-        <rect x="11" y="7" width="1" height="1" fill="currentColor" />
-        <rect x="9" y="10" width="2" height="1" fill="currentColor" />
-        <rect x="6" y="14" width="8" height="2" fill="currentColor" opacity="0.35" />
-      </svg>
-    </PixelIconWrap>
-  );
-}
-
-function PixelUserIcon() {
-  return (
-    <PixelIconWrap>
-      <svg width="20" height="20" viewBox="0 0 20 20" shapeRendering="crispEdges" aria-hidden>
-        <rect x="7" y="4" width="6" height="6" fill="currentColor" />
-        <rect x="5" y="11" width="10" height="5" fill="currentColor" opacity="0.35" />
-        <rect x="6" y="12" width="8" height="3" fill="currentColor" />
-      </svg>
-    </PixelIconWrap>
-  );
-}
-
-function PixelDoorIcon() {
-  return (
-    <PixelIconWrap>
-      <svg width="20" height="20" viewBox="0 0 20 20" shapeRendering="crispEdges" aria-hidden>
-        <rect x="5" y="3" width="10" height="14" fill="currentColor" opacity="0.25" />
-        <rect x="6" y="4" width="8" height="12" fill="currentColor" opacity="0.35" />
-        <rect x="7" y="5" width="6" height="10" fill="currentColor" />
-        <rect x="12" y="10" width="1" height="1" fill="rgba(0,0,0,0.45)" />
-      </svg>
-    </PixelIconWrap>
-  );
-}
 
 export default function UserMenu({ onClose }: { onClose: () => void }) {
   const auth = useContext(AuthContext);

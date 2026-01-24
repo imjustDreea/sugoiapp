@@ -9,15 +9,6 @@ import { getApiBase } from "../../lib/apiBase";
 
 type RawItem = Record<string, any>;
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === 'object' && !Array.isArray(value);
-}
-
-function getErrorMessage(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  return String(err);
-}
-
 function coverDataUrl(seed: string, accent = '#8FD3FE') {
   const svg = `
   <svg xmlns='http://www.w3.org/2000/svg' width='200' height='280'>
@@ -51,8 +42,7 @@ export default function MusicPage() {
   const itemsPerPage = 20;
 
   const [likesById, setLikesById] = useState<Record<string, { likes: number; liked: boolean }>>({});
-
-  // Calcular albums paginados
+ular albums paginados
   const totalPages = Math.ceil(albums.length / itemsPerPage);
   const startIdx = (currentPage - 1) * itemsPerPage;
   const paginatedAlbums = albums.slice(startIdx, startIdx + itemsPerPage);

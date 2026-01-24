@@ -119,7 +119,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const handleStatsUpdate = (event: Event) => {
       const customEvent = event as CustomEvent;
-      if (user?.id === customEvent.detail.userId) {
+      if (user?.id === customEvent.detail.userId && user?.id) {
         loadStats(user.id);
       }
     };
