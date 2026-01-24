@@ -117,7 +117,6 @@ export default function MusicPage() {
         genres: Array.isArray(it.genres) ? it.genres : (it.raw?.genres || []),
       }));
 
-      setAllAlbums(mapped);
       setAlbums(mapped);
     } catch (e: any) {
       setError(e?.message || String(e));
