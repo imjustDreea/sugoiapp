@@ -45,7 +45,12 @@ export default function ProfilePage() {
 
   const [libraryItems, setLibraryItems] = useState<
     Record<LibraryType, Record<LibraryListKey, LibraryItem[]>> | null
-  >(null);
+  >({
+    anime: { favorites: [], later: [] },
+    games: { favorites: [], later: [] },
+    manga: { favorites: [], later: [] },
+    music: { favorites: [], later: [] },
+  });
 
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [libraryError, setLibraryError] = useState<string | null>(null);
@@ -193,8 +198,9 @@ export default function ProfilePage() {
         }
 
         setLibraryItems(next);
-      } catch {
+      } catch (err) {
         if (cancelled) return;
+        console.error('Error loading library items:', err);
         setLibraryItems(null);
         setLibraryError('No se pudieron cargar tus listas.');
       } finally {
@@ -402,6 +408,10 @@ export default function ProfilePage() {
 
     if (libraryError) {
       return <p className="text-sm text-red-400">{libraryError}</p>;
+    }
+
+    if (!libraryItems) {
+      return <p className="text-sm text-muted">No hay datos de listas cargados.</p>;
     }
 
     const rows: Array<{ type: LibraryType; item: LibraryItem }> = [];
