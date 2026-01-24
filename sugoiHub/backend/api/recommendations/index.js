@@ -2,6 +2,16 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../../middleware/auth');
 
+let fetch;
+try {
+  fetch = global.fetch;
+  if (!fetch) {
+    fetch = require('node-fetch').default;
+  }
+} catch (e) {
+  fetch = require('node-fetch').default;
+}
+
 const cache = new Map();
 const DEFAULT_TTL = 3600; // 1 hora
 
@@ -21,9 +31,12 @@ function setCache(key, data, ttl = DEFAULT_TTL) {
 
 async function fetchWithRetry(url, retries = 2, backoffMs = 500) {
   let attempt = 0;
-  while (true) {
+  let lastError;
+  
+  while (attempt <= retries) {
     try {
       const r = await fetch(url);
+      
       if (r.status === 429 || (r.status >= 500 && r.status <= 599)) {
         attempt++;
         if (attempt > retries) return r;
@@ -31,14 +44,18 @@ async function fetchWithRetry(url, retries = 2, backoffMs = 500) {
         backoffMs *= 2;
         continue;
       }
+      
       return r;
     } catch (e) {
+      lastError = e;
       attempt++;
-      if (attempt > retries) throw e;
+      if (attempt > retries) throw lastError;
       await new Promise(resolve => setTimeout(resolve, backoffMs));
       backoffMs *= 2;
     }
   }
+  
+  throw lastError || new Error('Unknown fetch error');
 }
 
 // Generar seed basada en el día actual
@@ -77,6 +94,7 @@ router.get('/', authMiddleware, async (req, res) => {
       
       if (!animeData) {
         const r = await fetchWithRetry('https://api.jikan.moe/v4/top/anime?limit=100&page=1&type=tv');
+        if (!r.ok) throw new Error(`Jikan API error: ${r.status}`);
         const data = await r.json();
         animeData = data.data || [];
         setCache(cacheKey, animeData);
@@ -85,13 +103,17 @@ router.get('/', authMiddleware, async (req, res) => {
       const shuffled = shuffleWithSeed(animeData, seed);
       const selected = shuffled.slice(0, Math.ceil(limit / 3));
       
-      recommendations.push(...selected.map(item => ({
-        id: String(item.mal_id),
-        title: item.title,
-        image_url: item.images?.jpg?.image_url || null,
-        type: 'anime',
-        meta: { mal_id: item.mal_id, score: item.score }
-      })));
+      selected.forEach(item => {
+        if (item && item.mal_id && item.title) {
+          recommendations.push({
+            id: String(item.mal_id),
+            title: item.title,
+            image_url: item.images?.jpg?.image_url || null,
+            type: 'anime',
+            meta: { mal_id: item.mal_id, score: item.score }
+          });
+        }
+      });
     } catch (e) {
       console.error('Error fetching anime recommendations:', e.message);
     }
@@ -103,6 +125,7 @@ router.get('/', authMiddleware, async (req, res) => {
       
       if (!mangaData) {
         const r = await fetchWithRetry('https://api.jikan.moe/v4/top/manga?limit=100&page=1');
+        if (!r.ok) throw new Error(`Jikan API error: ${r.status}`);
         const data = await r.json();
         mangaData = data.data || [];
         setCache(cacheKey, mangaData);
@@ -111,13 +134,17 @@ router.get('/', authMiddleware, async (req, res) => {
       const shuffled = shuffleWithSeed(mangaData, seed + 1);
       const selected = shuffled.slice(0, Math.ceil(limit / 3));
       
-      recommendations.push(...selected.map(item => ({
-        id: String(item.mal_id),
-        title: item.title,
-        image_url: item.images?.jpg?.image_url || null,
-        type: 'manga',
-        meta: { mal_id: item.mal_id, score: item.score }
-      })));
+      selected.forEach(item => {
+        if (item && item.mal_id && item.title) {
+          recommendations.push({
+            id: String(item.mal_id),
+            title: item.title,
+            image_url: item.images?.jpg?.image_url || null,
+            type: 'manga',
+            meta: { mal_id: item.mal_id, score: item.score }
+          });
+        }
+      });
     } catch (e) {
       console.error('Error fetching manga recommendations:', e.message);
     }
@@ -128,7 +155,8 @@ router.get('/', authMiddleware, async (req, res) => {
       let musicData = getCache(cacheKey);
       
       if (!musicData) {
-        const r = await fetchWithRetry('https://api.jikan.moe/v4/top/anime?limit=50&page=1');
+        const r = await fetchWithRetry('https://api.jikan.moe/v4/top/anime?limit=50&page=2');
+        if (!r.ok) throw new Error(`Jikan API error: ${r.status}`);
         const data = await r.json();
         musicData = data.data || [];
         setCache(cacheKey, musicData);
@@ -137,15 +165,23 @@ router.get('/', authMiddleware, async (req, res) => {
       const shuffled = shuffleWithSeed(musicData, seed + 2);
       const selected = shuffled.slice(0, Math.ceil(limit / 3));
       
-      recommendations.push(...selected.map(item => ({
-        id: `ost_${item.mal_id}`,
-        title: `${item.title} OST`,
-        image_url: item.images?.jpg?.image_url || null,
-        type: 'music',
-        meta: { anime_id: item.mal_id, anime_title: item.title }
-      })));
+      selected.forEach(item => {
+        if (item && item.mal_id && item.title) {
+          recommendations.push({
+            id: `ost_${item.mal_id}`,
+            title: `${item.title} OST`,
+            image_url: item.images?.jpg?.image_url || null,
+            type: 'music',
+            meta: { anime_id: item.mal_id, anime_title: item.title }
+          });
+        }
+      });
     } catch (e) {
       console.error('Error fetching music recommendations:', e.message);
+    }
+
+    if (recommendations.length === 0) {
+      return res.status(500).json({ ok: false, error: 'No se pudieron obtener recomendaciones' });
     }
 
     return res.json({ ok: true, recommendations: recommendations.slice(0, limit) });
