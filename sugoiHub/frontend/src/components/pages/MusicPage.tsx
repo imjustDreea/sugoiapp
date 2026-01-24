@@ -33,7 +33,6 @@ export default function MusicPage() {
   const { showToast } = useToast();
 
   const [albums, setAlbums] = useState<Music[]>([]);
-  const [allAlbums, setAllAlbums] = useState<Music[]>([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
