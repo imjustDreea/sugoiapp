@@ -9,6 +9,14 @@ router.get('/', authMiddleware, async (req, res) => {
     const userId = req.user.id;
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 15));
 
+    // Obtener IDs que el usuario ya tiene en su biblioteca
+    const { rows: userLibrary } = await pool.query(
+      `SELECT DISTINCT external_id FROM public.library_items WHERE user_id = $1`,
+      [userId]
+    );
+    
+    const userItemIds = userLibrary.map(row => row.external_id);
+
     // Obtener recomendaciones aleatorias de anime, manga, music
     // que no estén en las listas del usuario
     const { rows: recommendations } = await pool.query(
@@ -17,18 +25,13 @@ router.get('/', authMiddleware, async (req, res) => {
          li.title,
          li.image_url,
          li.media_type as type,
-         li.meta,
-         CASE WHEN ul.external_id IS NOT NULL THEN true ELSE false END as in_library
+         li.meta
        FROM public.library_items li
-       LEFT JOIN (
-         SELECT external_id FROM public.library_items 
-         WHERE user_id = $1
-       ) ul ON ul.external_id = li.external_id
        WHERE li.media_type IN ('anime', 'manga', 'music')
-       AND ul.external_id IS NULL
+       AND li.external_id NOT IN (${userItemIds.map((_, i) => `$${i + 2}`).join(',') || "''"})
        ORDER BY RANDOM()
-       LIMIT $2`,
-      [userId, limit]
+       LIMIT $1`,
+      [limit, ...userItemIds]
     );
 
     return res.json({ ok: true, recommendations });
