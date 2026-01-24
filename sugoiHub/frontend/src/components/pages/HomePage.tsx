@@ -29,7 +29,8 @@ type Recommendation = {
 };
 
 export default function HomePage() {
-  const { user, token } = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
+  const token = authContext?.token;
   const [feed, setFeed] = useState<Post[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [feedLoading, setFeedLoading] = useState(false);
