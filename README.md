@@ -34,38 +34,202 @@ Abre una terminal PowerShell y ejecuta:
 # Desde la raíz del repo
 cd sugoiHub\backend
 npm install
-# Ejecuta el backend (usar el script disponible: npm run dev o npm start)
-npm run dev
+# sugoiHub - Plataforma de Recomendación de Contenido
 
-# En otra terminal, arranca el frontend
+Una plataforma full-stack para explorar, gestionar y recomendar contenido multimedia (anime, manga, juegos y música). Incluye autenticación de usuarios, sistema de recomendaciones, perfiles y una comunidad integrada.
+
+## 📋 Estado del Proyecto
+
+En desarrollo activo - Trabajo de Fin de Grado (TFG)
+
+## 🛠️ Tecnologías Principales
+
+| Capa           | Tecnologías                                 |
+|----------------|---------------------------------------------|
+| **Frontend**   | Vite, React 18+, TypeScript, Tailwind CSS   |
+| **Backend**    | Node.js, Express                            |
+| **Base de Datos** | PostgreSQL (Supabase)                    |
+| **Autenticación** | JWT + Supabase Auth                      |
+| **APIs Externas** | Jikan (Anime/Manga), APIs de Juegos y Música |
+
+## 📁 Estructura del Proyecto
+
+```
+sugoiapp/
+└── sugoiHub/
+	├── backend/
+	│   ├── api/
+	│   │   ├── anime/
+	│   │   ├── manga/
+	│   │   ├── games/
+	│   │   ├── music/
+	│   │   ├── posts/
+	│   │   ├── profile/
+	│   │   ├── auth/
+	│   │   ├── library/
+	│   │   ├── recommendations/
+	│   │   └── media/
+	│   ├── middleware/
+	│   ├── migrations/
+	│   ├── uploads/
+	│   ├── db.js
+	│   ├── index.js
+	│   └── package.json
+	└── frontend/
+		├── src/
+		│   ├── components/
+		│   │   ├── pages/
+		│   │   ├── allPages/
+		│   │   ├── homeComponents/
+		│   │   ├── games/
+		│   │   ├── manga/
+		│   │   ├── music/
+		│   │   ├── pixel/
+		│   │   └── ui/
+		│   ├── context/
+		│   ├── layouts/
+		│   ├── lib/
+		│   ├── assets/
+		│   ├── App.tsx
+		│   └── main.tsx
+		├── vite.config.ts
+		├── tailwind.config.cjs
+		└── package.json
+```
+
+## ✨ Funcionalidades Principales
+
+### 🔐 Autenticación y Perfiles
+- Registro e inicio de sesión con JWT
+- Perfiles de usuario personalizables
+- Sistema de seguidores (followers/following)
+- Perfiles públicos
+
+### 📚 Gestión de Contenido
+- Exploración y búsqueda de anime, manga, juegos y música
+- Integración con API Jikan para datos de anime/manga
+- Sistema de puntuaciones y recomendaciones
+- Biblioteca personal del usuario
+
+### 👥 Comunidad
+- Feed de posts de usuarios
+- Sistema de likes en posts
+- Recomendaciones personalizadas
+- Sección de descubrimiento
+
+## 🚀 Instalación y Configuración
+
+### Requisitos Previos
+- Node.js v16+
+- npm o pnpm
+- Cuenta de Supabase (para BD y Auth)
+
+### Pasos de Instalación
+
+**1. Backend**
+```powershell
+cd sugoiHub\backend
+npm install
+```
+
+**2. Frontend**
+```powershell
 cd ..\frontend
 npm install
-npm run dev
 ```
 
-Si algún `package.json` usa otro script para desarrollo usa `npm start` en su lugar.
+### Variables de Entorno
 
-**Variables de entorno**
-- Revisa `sugoiHub/backend` para variables relacionadas con Supabase o claves de API.
-- Crea un fichero `.env` en cada parte (backend/frontend) con las claves necesarias. Por ejemplo:
+Crea un archivo `.env` en `sugoiHub/backend/`:
+```env
+# Base de Datos
+DATABASE_URL=postgresql://user:password@localhost:5432/sugoidb
 
-```
-SUPABASE_URL=tu_url
-SUPABASE_KEY=tu_key
+# Supabase (si se usa)
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# JWT
+JWT_SECRET=your_secret_key
+
+# APIs Externas
 JIKAN_API_KEY=opcional
 ```
 
-**Ejecución de pruebas y utilidades**
-- Hay scripts de prueba en `sugoiHub/backend` como `test_fetch_jikan.js` y `test-supabase.js` para validar integraciones.
+Crea un archivo `.env` en `sugoiHub/frontend/`:
+```env
+VITE_API_URL=http://localhost:3000
+```
 
-**Contribuir**
-- Crea un fork y abre un PR con una descripción clara del cambio.
-- Para cambios mayores, abre una issue primero para discutir la propuesta.
+## 🔧 Desarrollo
 
-**Ideas y próximos pasos**
-- Añadir documentación de la API (OpenAPI / Swagger) para `sugoiHub/backend`.
-- Integrar CI/CD para despliegues automáticos.
-- Añadir tests unitarios y de integración.
+### Ejecutar Backend
+```powershell
+cd sugoiHub\backend
+npm run dev
+```
+Servidor disponible en: `http://localhost:3000`
 
-**Contacto**
-- Autor: imjustDreea (repositorio local: `sugoiapp`)
+### Ejecutar Frontend
+```powershell
+cd sugoiHub\frontend
+npm run dev
+```
+Aplicación disponible en: `http://localhost:5173`
+
+### Scripts Útiles Backend
+```powershell
+npm run dev              # Desarrollo con hot reload
+npm start               # Producción
+npm run seed-test-data  # Carga datos de prueba
+npm run reset-posts     # Resetea la tabla de posts
+```
+
+## 📖 Documentación Adicional
+
+- [BUTTON_SYSTEM.md](sugoiHub/frontend/BUTTON_SYSTEM.md) - Sistema de botones
+- [DEV_FIX.md](sugoiHub/frontend/DEV_FIX.md) - Notas de desarrollo
+- [README.md](sugoiHub/backend/README.md) - Documentación del backend
+
+## 🗄️ Base de Datos
+
+Las migraciones se encuentran en `sugoiHub/backend/migrations/`. Principales tablas:
+- `users` - Información de usuarios
+- `profiles` - Datos extendidos de perfil
+- `posts` - Posts de la comunidad
+- `likes` - Sistema de likes
+- `followers` - Relaciones de seguimiento
+- Tablas de contenido (anime, manga, games, music)
+
+## 🚢 Despliegue
+
+El proyecto está configurado para despliegue en Render. Consulta `render.yaml` para más detalles.
+
+## 📝 Contribuir
+
+1. Haz un fork del repositorio
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 🎯 Próximas Mejoras
+
+- [ ] Documentación API completa (Swagger/OpenAPI)
+- [ ] Tests unitarios e integración
+- [ ] CI/CD pipeline mejorado
+- [ ] Optimización de performance
+- [ ] Más integraciones de APIs de contenido
+
+## 👤 Autor
+
+**imjustDreea** - Repositorio: `sugoiapp`
+
+## 📄 Licencia
+
+Este proyecto es parte de un Trabajo de Fin de Grado.
+
+---
+
+**Para dudas o problemas**, abre una issue en el repositorio.
