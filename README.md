@@ -48,8 +48,8 @@ En desarrollo activo - Trabajo de Fin de Grado (TFG)
 |----------------|---------------------------------------------|
 | **Frontend**   | Vite, React 18+, TypeScript, Tailwind CSS   |
 | **Backend**    | Node.js, Express                            |
-| **Base de Datos** | PostgreSQL (Supabase)                    |
-| **Autenticación** | JWT + Supabase Auth                      |
+| **Base de Datos** | PostgreSQL (Neon)                        |
+| **Autenticación** | JWT + Neon Auth                          |
 | **APIs Externas** | Jikan (Anime/Manga), APIs de Juegos y Música |
 
 ## 📁 Estructura del Proyecto
@@ -145,10 +145,11 @@ Crea un archivo `.env` en `sugoiHub/backend/`:
 # Base de Datos
 DATABASE_URL=postgresql://user:password@localhost:5432/sugoidb
 
-# Supabase (si se usa)
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Neon (si se usa)
+NEON_DATABASE_URL=your_neon_database_url
+NEON_API_KEY=your_neon_api_key
+
 
 # JWT
 JWT_SECRET=your_secret_key
