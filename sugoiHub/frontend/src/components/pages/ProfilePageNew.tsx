@@ -22,9 +22,6 @@ type Profile = {
   badges?: string[] | null;
 };
 
-const BADGE_OPTIONS = ['Retro Gamer', 'Otaku'] as const;
-type BadgeOption = (typeof BADGE_OPTIONS)[number];
-
 export default function ProfilePageNew() {
   const auth = useContext(AuthContext);
   const user = auth?.user;

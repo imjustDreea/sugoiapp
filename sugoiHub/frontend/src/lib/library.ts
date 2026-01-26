@@ -36,7 +36,8 @@ export function formatLibraryDate(iso: string): string {
 
 export async function saveToLibrary(type: LibraryType, list: LibraryListKey, payload: SavePayload, token: string): Promise<void> {
   const apiBase = getApiBase();
-  const res = await fetch(`${apiBase}/api/library/${type}`, {
+  const endpoint = apiBase ? `${apiBase}/api/library/${type}` : `/api/library/${type}`;
+  const res = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -59,7 +60,8 @@ export async function saveToLibrary(type: LibraryType, list: LibraryListKey, pay
 
 export async function getLibrarySummary(token: string): Promise<Record<LibraryType, Record<LibraryListKey, number>>> {
   const apiBase = getApiBase();
-  const res = await fetch(`${apiBase}/api/library/summary`, {
+  const endpoint = apiBase ? `${apiBase}/api/library/summary` : `/api/library/summary`;
+  const res = await fetch(endpoint, {
     headers: { Authorization: `Bearer ${token}` },
   });
   const data = await res.json().catch(() => ({}));
@@ -81,7 +83,8 @@ export async function getLibraryItems(
   limit = 6
 ): Promise<LibraryItem[]> {
   const apiBase = getApiBase();
-  const url = new URL(`${apiBase}/api/library/${type}`);
+  const endpoint = apiBase ? `${apiBase}/api/library/${type}` : `/api/library/${type}`;
+  const url = new URL(endpoint, window.location.origin);
   url.searchParams.set('list', list);
   url.searchParams.set('limit', String(limit));
 
@@ -102,7 +105,8 @@ export async function removeFromLibrary(
   token: string
 ): Promise<void> {
   const apiBase = getApiBase();
-  const url = new URL(`${apiBase}/api/library/${type}/${encodeURIComponent(externalId)}`);
+  const endpoint = apiBase ? `${apiBase}/api/library/${type}/${encodeURIComponent(externalId)}` : `/api/library/${type}/${encodeURIComponent(externalId)}`;
+  const url = new URL(endpoint, window.location.origin);
   url.searchParams.set('list', list);
 
   const res = await fetch(url.toString(), {

@@ -82,7 +82,7 @@ export default function CommunityPage() {
   async function loadPosts() {
     setLoading(true);
     try {
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await fetch('/api/posts?limit=50', { headers });
       const data = await res.json();
       if (data.ok) {

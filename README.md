@@ -68,8 +68,4 @@ JIKAN_API_KEY=opcional
 - Añadir tests unitarios y de integración.
 
 **Contacto**
-- Autor: andaa (repositorio local: `sugoiapp`)
-
-—
-Si quieres, adapto el README a formato en inglés, añado badges (ci, license) o incluyo ejemplos concretos de uso de la API. ¿Qué prefieres que haga a continuación?
-
+- Autor: imjustDreea (repositorio local: `sugoiapp`)

@@ -240,6 +240,10 @@ app.use('/api/library', libraryRouter);
 const postsRouter = require('./api/posts');
 app.use('/api/posts', postsRouter);
 
+// Mount recommendations API router
+const recommendationsRouter = require('./api/recommendations');
+app.use('/api/recommendations', recommendationsRouter);
+
 // Static uploads (avatars/banners)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

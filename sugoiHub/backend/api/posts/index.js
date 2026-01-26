@@ -248,4 +248,45 @@ router.post('/:postId/comments', authMiddleware, async (req, res) => {
   }
 });
 
+// GET /api/posts/feed -> posts del timeline (gente que sigo)
+router.get('/feed', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
+    const offset = Math.max(0, parseInt(req.query.offset) || 0);
+
+    const { rows } = await pool.query(
+      `SELECT 
+         p.id, p.user_id, p.content, p.image_url, p.created_at,
+         p.favorite_type, p.favorite_id, p.favorite_title, p.favorite_image,
+         u.username, u.name,
+         pr.avatar_url,
+         (SELECT COUNT(*) FROM public.post_likes WHERE post_id = p.id) as likes_count,
+         (SELECT COUNT(*) FROM public.post_comments WHERE post_id = p.id) as comments_count,
+         (SELECT COUNT(*) FROM public.post_likes WHERE post_id = p.id AND user_id = $3) > 0 as user_has_liked
+       FROM public.posts p
+       JOIN public.users u ON u.id = p.user_id
+       LEFT JOIN public.profile pr ON pr.user_id = p.user_id
+       WHERE p.user_id IN (
+         SELECT followed_id FROM public.followers WHERE follower_id = $3
+       )
+       ORDER BY p.created_at DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset, userId]
+    );
+
+    // Convertir likes_count y comments_count a números
+    const postsWithNumbers = rows.map(row => ({
+      ...row,
+      likes_count: parseInt(row.likes_count) || 0,
+      comments_count: parseInt(row.comments_count) || 0
+    }));
+
+    return res.json({ ok: true, posts: postsWithNumbers });
+  } catch (err) {
+    console.error('Posts FEED error:', err);
+    return res.status(500).json({ ok: false, error: 'Error obteniendo feed' });
+  }
+});
+
 module.exports = router;

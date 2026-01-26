@@ -9,15 +9,6 @@ import { getApiBase } from "../../lib/apiBase";
 
 type RawItem = Record<string, any>;
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === 'object' && !Array.isArray(value);
-}
-
-function getErrorMessage(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  return String(err);
-}
-
 function coverDataUrl(seed: string, accent = '#8FD3FE') {
   const svg = `
   <svg xmlns='http://www.w3.org/2000/svg' width='200' height='280'>
@@ -42,7 +33,6 @@ export default function MusicPage() {
   const { showToast } = useToast();
 
   const [albums, setAlbums] = useState<Music[]>([]);
-  const [allAlbums, setAllAlbums] = useState<Music[]>([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -127,7 +117,6 @@ export default function MusicPage() {
         genres: Array.isArray(it.genres) ? it.genres : (it.raw?.genres || []),
       }));
 
-      setAllAlbums(mapped);
       setAlbums(mapped);
     } catch (e: any) {
       setError(e?.message || String(e));
